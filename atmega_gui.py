@@ -2,6 +2,6 @@
 
 """ Bootstrap atmega gui """
 
-from atmega_gui.main import main
+from atmega_gui.main import MainWindow
 
-main()
+MainWindow()
