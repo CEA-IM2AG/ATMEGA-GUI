@@ -2,7 +2,7 @@
 
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from views.visualisation_ui import Ui_Dialog as visualisationUI
+from atmega_gui.views.visualisation_ui import Ui_Dialog as visualisationUI
 
 class Window(QMainWindow, visualisationUI):
     def __init__(self, parent=None):

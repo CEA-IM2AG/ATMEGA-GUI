@@ -2,7 +2,7 @@
 
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
-from views.Fenetre_RX_ui import Ui_Dialog as rxUI
+from atmega_gui.views.Fenetre_RX_ui import Ui_Dialog as rxUI
 
 class RxWindow(QMainWindow, rxUI):
     def __init__(self, parent=None):

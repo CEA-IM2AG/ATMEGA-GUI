@@ -1,23 +1,18 @@
 """ Main TEST ram client window """
 
 
-<<<<<<< HEAD
-from PyQt5 import QtCore, QtWidgets
-=======
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
->>>>>>> 8385d0e87a246a6638bfaa5689db18842e1e39d7
 from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 from time import time
 
 import sys
-from os import spawnlp, P_NOWAIT
 
 from atmega.ram import RAM
 
-from views.Fenetre_main_ui import Ui_Dialog as MainUI
-from rx import RxWindow
+from atmega_gui.views.Fenetre_main_ui import Ui_Dialog as MainUI
+from atmega_gui.rx import RxWindow
 
 
 class MainWindow(QMainWindow, MainUI):
@@ -140,6 +135,7 @@ class MainWindow(QMainWindow, MainUI):
         self.spawn_box("Dump", f"Successfully done in {round(time() - t1, 2)}s", QMessageBox.Information)
         if open:
             if "linux" in sys.platform:
+                from os import spawnlp, P_NOWAIT
                 spawnlp(P_NOWAIT, "xdg-open", "xdg-open", "dump.txt")
             elif sys.platform == "win32":
                 pass # TODO windows implementation
