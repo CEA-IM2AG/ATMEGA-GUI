@@ -3,9 +3,6 @@
 from logging.handlers import QueueListener
 from sys import platform, argv, exit
 
-from os import spawnlp, P_NOWAIT
-from curses import baudrate
-
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QMessageBox
