@@ -198,7 +198,7 @@ class ScriptExe:
             counter += 1
 
 
-def compare(old, new, glist):
+def compare(old, new, glist, start=40, end=168):
     """
         Compares two dump files and modify glist
         
@@ -220,25 +220,27 @@ def compare(old, new, glist):
     if len(lo) != len(ln):
         raise Exception("Two dumps differ in size")
 
-    for vo, vn in zip(lo, ln):
+    for n in range(start,end):
+        vo = lo[n]
+        vn = ln[n]
         # each line is in the format addr:value
         # we extract the value
         no = int(vo.split(':')[1], base=16)
         nn = int(vn.split(':')[1], base=16)
         # xor to get the difference
-        for i in range(16):
+        for i in range(8):
             bo = (no >> i) & 1
             bn = (nn >> i) & 1
             if bn > bo:
-                if 0 < glist[n*16 + i] < 3:
-                    glist[n*16 + i] = 3
+                if 0 < glist[n*8 + i] < 3:
+                    glist[n*8 + i] = 3
                 else:
-                    glist[n*16 + i] = 1
+                    glist[n*8 + i] = 1
             elif bo > bn:
-                if 0 < glist[n*16 + i] < 3:
-                    glist[n*16 + i] = 3
+                if 0 < glist[n*8 + i] < 3:
+                    glist[n*8 + i] = 3
                 else:
-                    glist[n*16 + i] = 2
+                    glist[n*8 + i] = 2
 
 def copy(source, dest, increment):
     """
