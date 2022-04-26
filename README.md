@@ -5,4 +5,9 @@ Provides a GUI for ATMEGA microcontroller through an FTDI USB device.
 
 ## Requirements
 
-Install requirements: `pip install -r requirements.txt`
+On Windows, click on `install.bat`.  
+Install requirements with cli: `pip install -r requirements.txt`
+
+## Launch app
+On Windows, click on `app.bat`.  
+In the directory, launch as a python module: `python -m atmega_gui`

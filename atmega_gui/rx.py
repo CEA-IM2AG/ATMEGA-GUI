@@ -1,71 +1,47 @@
 """ RX scripting window """
 
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from atmega_gui.views.Fenetre_RX_ui import Ui_Dialog as rxUI
 
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QFileDialog
+class RxWindow(QMainWindow, rxUI):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+        self.connectSignalsSlots()
+        self.log = print
 
-
-class Window_RX:
-    def setupUi(self, dialog):
-        dialog.setObjectName("Dialog")
-        dialog.resize(921, 473)
-        dialog.setMinimumSize(QtCore.QSize(921, 473))
-        dialog.setMaximumSize(QtCore.QSize(921, 473))
-        self.pushButton = QtWidgets.QPushButton(dialog)
-        self.pushButton.setGeometry(QtCore.QRect(20, 20, 121, 31))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton.clicked.connect(self.loadscript)
-        self.filenameLineEdit = QtWidgets.QLineEdit(dialog)
-        self.filenameLineEdit.setGeometry(QtCore.QRect(150, 20, 471, 31))
-        self.filenameLineEdit.setObjectName("lineEdit")
-        self.startButton = QtWidgets.QPushButton(dialog)
-        self.startButton.setGeometry(QtCore.QRect(20, 70, 121, 31))
-        self.startButton.setObjectName("pushButton_2")
-        self.pauseButton = QtWidgets.QPushButton(dialog)
-        self.pauseButton.setGeometry(QtCore.QRect(160, 70, 61, 31))
-        self.pauseButton.setObjectName("pushButton_3")
-        self.stopButton = QtWidgets.QPushButton(dialog)
-        self.stopButton.setGeometry(QtCore.QRect(240, 70, 121, 31))
-        self.stopButton.setObjectName("pushButton_4")
-        self.gridLayoutWidget = QtWidgets.QWidget(dialog)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(19, 119, 881, 331))
-        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
-        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
-        self.gridLayout.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
-        self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout.setHorizontalSpacing(4)
-        self.gridLayout.setObjectName("gridLayout")
-        self.textBrowser = QtWidgets.QTextBrowser(self.gridLayoutWidget)
-        self.textBrowser.setObjectName("textBrowser")
-        self.gridLayout.addWidget(self.textBrowser, 0, 0, 1, 1)
-
-        self.retranslateUi(dialog)
-        QtCore.QMetaObject.connectSlotsByName(dialog)
-
-    def retranslateUi(self, dialog):
-        _translate = QtCore.QCoreApplication.translate
-        dialog.setWindowTitle(_translate("Dialog", "Dialog"))
-        self.pushButton.setText(_translate("Dialog", "Charger un Script"))
-        self.startButton.setText(_translate("Dialog", "Demarer"))
-        self.startButton.clicked.connect(self.on_start)
-        self.pauseButton.setText(_translate("Dialog", "Pause"))
-        self.pauseButton.clicked.connect(self.on_pause)
-        self.stopButton.setText(_translate("Dialog", "Stopper"))
-        self.stopButton.clicked.connect(self.on_stop)
-
-    def loadscript(self):
-        script_name = QFileDialog.getOpenFileName(
-            None, "", "", "Scripts (*.sc.py *.txt)", None)[0]
-        self.filenameLineEdit.setText(script_name)
+    def connectSignalsSlots(self):
+        """ Implement all the actions on each component """
+        self.btn_Demarer.clicked.connect(self.on_start)
+        self.btn_Pause.clicked.connect(self.on_pause)
+        self.btn_Stop.clicked.connect(self.on_stop)
+        self.btn_Browse.clicked.connect(self.loadscript)
 
     def on_start(self):
         """ Start callback function """
-        print("Start button clicked")
-
-    def on_stop(self):
-        """ Stop callback function """
-        print("Stop button clicked")
+        self.log("Start button clicked")
+        filename = self.txt_Path.text()
+        self.log(filename)
+        if filename:
+            self.script_exe.exec_file(filename)
 
     def on_pause(self):
         """ Pause callback function """
-        print("Pause button clicked")
+        self.log("Pause button clicked")
+
+    def on_stop(self):
+        """ Stop callback function """
+        self.log("Stop button clicked")
+
+    def loadscript(self):
+        script_name = QFileDialog.getOpenFileName(
+            None, "", "", "Scripts (*.sc.py *.txt)")[0]
+        self.txt_Path.setText(script_name)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = RxWindow()
+    win.show()
+    sys.exit(app.exec())
