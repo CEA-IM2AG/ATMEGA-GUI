@@ -197,37 +197,48 @@ class ScriptExe:
             first_iteration = False
             counter += 1
 
-def compare(file1, file2):
+
+def compare(old, new, glist):
     """
-        Compares two dump files
-        :return: Number of bits that are different
+        Compares two dump files and modify glist
+        
+        :param old: old file
+        :param new: new file
+        :param glist: comparison list
     """
     try:
-        f1 = open(file1, "r+")
-        f2 = open(file2, "r+")
+        fo = open(old, "r+")
+        fn = open(new, "r+")
     except OSError:
        raise Exception("Could not open/read file")
 
-    l1 = f1.readlines()
-    l2 = f2.readlines()
-    f1.close()
-    f2.close()
+    lo = fo.readlines()
+    ln = fn.readlines()
+    fo.close()
+    fn.close()
 
-    if len(l1) != len(l2):
+    if len(lo) != len(ln):
         raise Exception("Two dumps differ in size")
 
-    diff = 0
-    for i in range(len(l1)):
+    for vo, vn in zip(lo, ln):
         # each line is in the format addr:value
         # we extract the value
-        n1 = int(l1[i].split(':')[1], base=16)
-        n2 = int(l2[i].split(':')[1], base=16)
+        no = int(vo.split(':')[1], base=16)
+        nn = int(vn.split(':')[1], base=16)
         # xor to get the difference
-        flipped_bits = n1 ^ n2
-        # population count: get the number of non zero bits
-        diff += flipped_bits.bit_count()
-
-    return diff
+        for i in range(16):
+            bo = (no >> i) & 1
+            bn = (nn >> i) & 1
+            if bn > bo:
+                if 0 < glist[n*16 + i] < 3:
+                    glist[n*16 + i] = 3
+                else:
+                    glist[n*16 + i] = 1
+            elif bo > bn:
+                if 0 < glist[n*16 + i] < 3:
+                    glist[n*16 + i] = 3
+                else:
+                    glist[n*16 + i] = 2
 
 def copy(source, dest, increment):
     """
