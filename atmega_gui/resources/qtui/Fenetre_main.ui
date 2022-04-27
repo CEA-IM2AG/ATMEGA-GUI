@@ -340,6 +340,19 @@
     </property>
    </item>
   </widget>
+  <widget class="QPushButton" name="btn_Actualiser">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>50</y>
+     <width>101</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Actualiser</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
