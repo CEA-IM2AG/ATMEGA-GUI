@@ -117,23 +117,13 @@
     </item>
    </layout>
   </widget>
-  <widget class="QOpenGLWidget" name="voyant">
-   <property name="geometry">
-    <rect>
-     <x>680</x>
-     <y>10</y>
-     <width>51</width>
-     <height>51</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QProgressBar" name="pgb">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>650</x>
+     <x>400</x>
      <y>80</y>
      <width>171</width>
      <height>16</height>
@@ -144,6 +134,19 @@
    </property>
    <property name="textVisible">
     <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="pgbLabel">
+   <property name="geometry">
+    <rect>
+     <x>580</x>
+     <y>80</y>
+     <width>331</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>
