@@ -28,14 +28,14 @@
   <widget class="QLabel" name="label_Circuit">
    <property name="geometry">
     <rect>
-     <x>140</x>
+     <x>160</x>
      <y>10</y>
-     <width>91</width>
+     <width>121</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>Circuit teste</string>
+    <string>Circuit testé</string>
    </property>
   </widget>
   <widget class="QComboBox" name="combo_Circuit">
@@ -43,7 +43,7 @@
     <rect>
      <x>20</x>
      <y>10</y>
-     <width>111</width>
+     <width>131</width>
      <height>23</height>
     </rect>
    </property>
@@ -74,9 +74,9 @@
   <widget class="QPushButton" name="btn_InitRAM">
    <property name="geometry">
     <rect>
-     <x>99</x>
+     <x>89</x>
      <y>220</y>
-     <width>121</width>
+     <width>141</width>
      <height>41</height>
     </rect>
    </property>
@@ -115,7 +115,7 @@
     <rect>
      <x>90</x>
      <y>100</y>
-     <width>61</width>
+     <width>81</width>
      <height>21</height>
     </rect>
    </property>
@@ -165,35 +165,35 @@
   <widget class="QCheckBox" name="check_Incre">
    <property name="geometry">
     <rect>
-     <x>230</x>
+     <x>240</x>
      <y>220</y>
-     <width>111</width>
+     <width>131</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>Incrementale</string>
+    <string>Incrémentale</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="check_Comple">
    <property name="geometry">
     <rect>
-     <x>230</x>
+     <x>240</x>
      <y>240</y>
-     <width>121</width>
+     <width>141</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>Complemente</string>
+    <string>Complémentale</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btn_DumpRAM">
    <property name="geometry">
     <rect>
-     <x>100</x>
+     <x>90</x>
      <y>280</y>
-     <width>121</width>
+     <width>141</width>
      <height>41</height>
     </rect>
    </property>
@@ -211,7 +211,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Afficher le resultat de la relecture (EditPlus 2)</string>
+    <string>Afficher le résultat de la relecture</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_Baudrate">
@@ -219,7 +219,7 @@
     <rect>
      <x>120</x>
      <y>420</y>
-     <width>81</width>
+     <width>91</width>
      <height>21</height>
     </rect>
    </property>
@@ -262,7 +262,7 @@
     <rect>
      <x>20</x>
      <y>470</y>
-     <width>91</width>
+     <width>111</width>
      <height>41</height>
     </rect>
    </property>
@@ -273,7 +273,7 @@
   <widget class="QPushButton" name="btn_RX">
    <property name="geometry">
     <rect>
-     <x>150</x>
+     <x>160</x>
      <y>470</y>
      <width>51</width>
      <height>41</height>
