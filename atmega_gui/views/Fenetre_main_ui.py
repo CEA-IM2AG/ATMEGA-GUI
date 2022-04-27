@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '../../ressources/Fenetre_main.ui'
+# Form implementation generated from reading ui file '../../resources/Fenetre_main.ui'
 #
 # Created by: PyQt5 UI code generator 5.12.3
 #
@@ -93,6 +93,9 @@ class Ui_Dialog(object):
         self.combo_Circuit_2.setGeometry(QtCore.QRect(20, 50, 131, 23))
         self.combo_Circuit_2.setObjectName("combo_Circuit_2")
         self.combo_Circuit_2.addItem("")
+        self.btn_Actualiser = QtWidgets.QPushButton(Dialog)
+        self.btn_Actualiser.setGeometry(QtCore.QRect(250, 50, 101, 23))
+        self.btn_Actualiser.setObjectName("btn_Actualiser")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -124,3 +127,4 @@ class Ui_Dialog(object):
         self.btn_Exit.setText(_translate("Dialog", "Exit"))
         self.label_Circuit_2.setText(_translate("Dialog", "Port FTDI"))
         self.combo_Circuit_2.setItemText(0, _translate("Dialog", "No device"))
+        self.btn_Actualiser.setText(_translate("Dialog", "Actualiser"))
