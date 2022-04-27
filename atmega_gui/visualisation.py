@@ -1,22 +1,20 @@
 """ Visualization window """
 
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from atmega_gui.views.visualisation_ui import Ui_Dialog as visualisationUI
 from atmega_gui.util import compare
 from atmega_gui.bitmap import print_bitmap
 
-class Window(QMainWindow, visualisationUI):
+class VisualizationUI(QMainWindow, visualisationUI):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         self.connectSignalsSlots()
 
     def connectSignalsSlots(self):
-        # TODO
         self.btn_Load.clicked.connect(self.on_load)
-        self.btn_ChargFich.connect(self.load_fich)
-        pass
+        self.btn_ChargeFich.clicked.connect(self.load_fich)
 
     def on_load(self):
         glist = [0 for i in range(1024)]
@@ -33,6 +31,6 @@ class Window(QMainWindow, visualisationUI):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    win = Window()
+    win = VisualizationUI()
     win.show()
     sys.exit(app.exec())

@@ -6,12 +6,11 @@ from atmega.ram import RAM
 from time import sleep, time
 from sys import platform
 from time import gmtime, strftime
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtMultimedia
 from PyQt5.QtWidgets import QMessageBox
-import os
+import atmega_gui
+from os import path
 
-if platform == "win32":
-    import winsound # TODO unix equivalent
 
 def spawn_box(title, text, icon=QMessageBox.Warning):
     """
@@ -37,10 +36,12 @@ class TextWorker(QtCore.QThread):
     def __init__(self, fn, *args, **kwargs):
         super().__init__()
         self.signal = TextSignal()
+        self.sound = TextSignal()
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
         self.kwargs['output'] = self.signal.output
+        self.kwargs['sound'] = self.sound.output
 
     @QtCore.pyqtSlot()
     def run(self):
@@ -67,17 +68,19 @@ class ScriptExe:
         self.stop = False
         self.running = False
         self.pause = False
-        self.glist = [0]*(device.ram_size - 40)
+        self.glist = [0]*(device.ram_size - 40)*8
 
     def on_error_stop(self):
         """ Stop the execution of the script """
-        play_sound()
+        sound.emit("error")
         self.ram.close()
 
-    def exec_file(self, file, output=None):
+    def exec_file(self, file, output=None, sound=None):
         """ Execute a script """
         if output is None:
             output = FallbackOutput
+        if sound is None:
+            sound = FallbackOutput
         lines = open_file(file)
         start_time = time()
         first_iteration = True
@@ -195,9 +198,7 @@ class ScriptExe:
                     if nb_error:
                         output.emit(f"Found {nb_error} differences")
                         if beep_on_error:
-                            frequency = 2500  # Set Frequency To 2500 Hertz
-                            duration = 1000   # Set Duration To 1000 ms= 1 seconde
-                            play_sound(frequency, duration)
+                            sound.emit("ding_dong")
                         elif stop_on_error:
                             output.emit("Error. Stopping the script")
                             self.on_error_stop()
@@ -251,6 +252,7 @@ def compare(old, new, glist):
         :param new: new file
         :param glist: comparison list
     """
+    print(len(glist))
     try:
         fo = open(old, "r+")
         fn = open(new, "r+")
@@ -283,6 +285,7 @@ def compare(old, new, glist):
                     glist[n*8 + i] = 1
             elif bo > bn:
                 n_diff += 1
+                print(n*8 + 1)
                 if 0 < glist[n*8 + i] < 3:
                     glist[n*8 + i] = 3
                 else:
@@ -327,12 +330,12 @@ def open_file(file):
             cleaned_lines.append(l)
     return cleaned_lines
 
-def play_sound(frequency=2500, duration=1000):
-    """ Plays a sound """
-    if platform == "win32":
-        winsound.Beep(frequency, duration)
-    elif "linux" in platform:
-        # FIXME use something else
-        os.system("beep -f " + str(frequency) + " -l " +  str(duration))
-    else:
-        raise Exception("Unknown operating system. Cannot play beep")
+def play_sound(sound):
+    """
+        Plays a sound inside a Qt context.
+        :param file: the file to play sound in ding_dong, error or incorrect
+    """
+    if sound not in ["ding_dong", "error", "incorrect"]:
+        raise Exception("Incorrect file")
+    file = path.join(path.dirname(atmega_gui.__file__), "resources", "audio", sound + ".wav")
+    QtMultimedia.QSound.play(file)
