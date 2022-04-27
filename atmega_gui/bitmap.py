@@ -14,8 +14,8 @@ def print_bitmap(matrix, zoom=False):
         :param matrix: matrice des valeurs de modification
         :param zoom: option de zoom pour ignorer les lignes de bits inchanges
     """
-    borne_x = 31 # indice de la derniere colonne de matrix
-    borne_y = 31 # indice de la dernere ligne de matrix
+    borne_x = 287 # indice de la derniere colonne de matrix
+    borne_y = 453 # indice de la dernere ligne de matrix
     if zoom: # option zoom activable depuis
     # la fenetre de visualisation
         can_zoom = True # indique si la ligne

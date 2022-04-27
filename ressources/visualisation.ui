@@ -30,12 +30,12 @@
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>141</width>
+     <width>161</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>Resultat courant</string>
+    <string>Résultat courant</string>
    </property>
   </widget>
   <widget class="QRadioButton" name="radio_ResEnreg">
@@ -43,18 +43,18 @@
     <rect>
      <x>20</x>
      <y>50</y>
-     <width>151</width>
+     <width>161</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>Resultat enregistre</string>
+    <string>Résultat enregistré</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="txt_Path">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>330</x>
      <y>50</y>
      <width>421</width>
      <height>31</height>
@@ -66,7 +66,7 @@
     <rect>
      <x>190</x>
      <y>50</y>
-     <width>101</width>
+     <width>131</width>
      <height>31</height>
     </rect>
    </property>
@@ -94,12 +94,12 @@
      <rect>
       <x>20</x>
       <y>40</y>
-      <width>111</width>
+      <width>131</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Differentielle</string>
+     <string>Différentielle</string>
     </property>
    </widget>
    <widget class="QRadioButton" name="radio_Incre">
@@ -107,12 +107,12 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>121</width>
+      <width>131</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Incementale</string>
+     <string>Incrémentale</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="check_Zoom">
@@ -120,7 +120,7 @@
      <rect>
       <x>20</x>
       <y>70</y>
-      <width>85</width>
+      <width>101</width>
       <height>21</height>
      </rect>
     </property>
@@ -197,9 +197,9 @@
   <widget class="QPushButton" name="btn_SaveImage">
    <property name="geometry">
     <rect>
-     <x>670</x>
+     <x>660</x>
      <y>160</y>
-     <width>141</width>
+     <width>151</width>
      <height>41</height>
     </rect>
    </property>
@@ -210,9 +210,9 @@
   <widget class="QPushButton" name="btn_SaveTout">
    <property name="geometry">
     <rect>
-     <x>670</x>
+     <x>660</x>
      <y>210</y>
-     <width>141</width>
+     <width>151</width>
      <height>41</height>
     </rect>
    </property>
@@ -223,9 +223,9 @@
   <widget class="QPushButton" name="btn_Graph">
    <property name="geometry">
     <rect>
-     <x>670</x>
+     <x>660</x>
      <y>110</y>
-     <width>141</width>
+     <width>151</width>
      <height>41</height>
     </rect>
    </property>
@@ -270,6 +270,25 @@
    </property>
    <property name="text">
     <string>s</string>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="pgb">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>90</y>
+     <width>171</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>0</number>
+   </property>
+   <property name="textVisible">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>
