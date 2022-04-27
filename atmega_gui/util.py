@@ -67,6 +67,7 @@ class ScriptExe:
         self.stop = False
         self.running = False
         self.pause = False
+        self.glist = [0]*(device.ram_size - 40)
 
     def on_error_stop(self):
         """ Stop the execution of the script """
@@ -189,7 +190,7 @@ class ScriptExe:
                         beep_on_error = "BEEP" in arg[2]
                         stop_on_error = "STOP" in arg[2]
 
-                    nb_error = compare(arg[0], arg[1])
+                    nb_error = compare(arg[0], arg[1], self.glist)
                     last_comp = nb_error > 0
                     if nb_error:
                         output.emit(f"Found {nb_error} differences")
@@ -242,10 +243,10 @@ class ScriptExe:
             counter += 1
 
 
-def compare(old, new, glist, start=40, end=168):
+def compare(old, new, glist):
     """
         Compares two dump files and modify glist
-        
+
         :param old: old file
         :param new: new file
         :param glist: comparison list
@@ -264,9 +265,8 @@ def compare(old, new, glist, start=40, end=168):
     if len(lo) != len(ln):
         raise Exception("Two dumps differ in size")
 
-    for n in range(start,end):
-        vo = lo[n]
-        vn = ln[n]
+    n_diff = 0
+    for n, (vo, vn) in enumerate(zip(lo, ln)):
         # each line is in the format addr:value
         # we extract the value
         no = int(vo.split(':')[1], base=16)
@@ -276,15 +276,19 @@ def compare(old, new, glist, start=40, end=168):
             bo = (no >> i) & 1
             bn = (nn >> i) & 1
             if bn > bo:
+                n_diff += 1
                 if 0 < glist[n*8 + i] < 3:
                     glist[n*8 + i] = 3
                 else:
                     glist[n*8 + i] = 1
             elif bo > bn:
+                n_diff += 1
                 if 0 < glist[n*8 + i] < 3:
                     glist[n*8 + i] = 3
                 else:
                     glist[n*8 + i] = 2
+    return n_diff
+
 
 def copy(source, dest, increment):
     """
@@ -332,7 +336,3 @@ def play_sound(frequency=2500, duration=1000):
         os.system("beep -f " + str(frequency) + " -l " +  str(duration))
     else:
         raise Exception("Unknown operating system. Cannot play beep")
-
-if __name__ == "__main__": # tests
-    n = compare("dump1.txt", "dump2.txt")
-    print(n)
