@@ -1,18 +1,21 @@
 """ Main TEST ram client window """
 
-
 from PyQt5 import QtCore
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 from time import time
 
+import logging
 import sys
 
 from atmega.ram import RAM
 
 from atmega_gui.views.Fenetre_main_ui import Ui_Dialog as MainUI
 from atmega_gui.rx import RxWindow
+from atmega_gui.util import spawn_box
+
+log = logging.getLogger("ATMEGA GUI")
 
 
 class MainWindow(QMainWindow, MainUI):
@@ -23,20 +26,13 @@ class MainWindow(QMainWindow, MainUI):
         self.connectSignalsSlots()
         # RX subwindow
         self.RX_ui = RxWindow(self)
-
-    @staticmethod
-    def spawn_box(title, text, icon=QMessageBox.Warning):
-        """
-            Spawn a message box
-            :param title: title of the message box
-            :param text: text of the message box
-            :param icon: icon of the message box
-        """
-        box = QMessageBox()
-        box.setWindowTitle(title)
-        box.setText(text)
-        box.setIcon(icon)
-        box.exec()
+        # Connection à la carte
+        try:
+            self.ram = RAM(timeout=1)
+        except:
+            self.ram = None
+            log.info("No ram found")
+            spawn_box("Connection error", "No device found", QMessageBox.Critical)
 
     def connectSignalsSlots(self):
         """ Implement all the actions on each component """
@@ -61,6 +57,8 @@ class MainWindow(QMainWindow, MainUI):
     def closeWindow(self):
         """ Close all subwindows """
         self.RX_ui.close()
+        if self.ram is not None: # Restauration de l'appareil
+            self.ram.close()
         self.close()
 
     def openRX(self):
@@ -79,48 +77,51 @@ class MainWindow(QMainWindow, MainUI):
         """ Reset callback function """
         str_value = self.txt_InitRAM.text()
         if not str_value:
-            self.spawn_box("Reset error", "Empty reset value")
+            spawn_box("Reset error", "Empty reset value")
             return
         value = int(str_value, base=16)
         complement = self.check_Comple.isChecked()
         increment = self.check_Incre.isChecked()
         try:
             self.ram.reset(value, increment, complement)
-        except:
-            self.spawn_box("Reset error", "Connection failed")
+        except Exception as e:
+            log.warn(e)
+            spawn_box("Reset error", "Connection failed")
             return
-        self.spawn_box("Reset", "Successfully done", QMessageBox.Information)
+        spawn_box("Reset", "Successfully done", QMessageBox.Information)
 
     def on_read(self):
         """ Read callback function """
         str_address = self.txt_Adresse.text()
         if not str_address:
-            self.spawn_box("Read error", "Empty address")
+            spawn_box("Read error", "Empty address")
             return
         address = int(str_address, base=16)
         try:
             val = self.ram.read(address)
-        except:
-            self.spawn_box("Read error", "Connection failed")
+        except Exception as e:
+            log.warn(e)
+            spawn_box("Read error", "Connection failed")
             return
-        self.readValueLineEdit.setText(hex(val))
+        self.txt_Lire.setText(hex(val))
 
     def on_write(self):
         """ Write callback function """
         str_address = self.txt_Adresse.text()
         str_value = self.txt_Ecrire.text()
         if not str_address:
-            self.spawn_box("Write error", "Empty address")
+            spawn_box("Write error", "Empty address")
             return
         if not str_value:
-            self.spawn_box("Write error", "Empty value")
+            spawn_box("Write error", "Empty value")
             return
         address = int(str_address, base=16)
         value = int(str_value, base=16)
         try:
             self.ram.write(value, address)
-        except:
-            self.spawn_box("Write error", "Connection failed")
+        except Exception as e:
+            print(e)
+            spawn_box("Write error", "Connection failed")
 
     def on_dump(self):
         """ Dump callback function """
@@ -129,10 +130,12 @@ class MainWindow(QMainWindow, MainUI):
         t1 = time()
         try:
             self.ram.dump_to_file("dump.txt")
-        except:
-            self.spawn_box("Dump error", "Connection failed")
+        except Exception as e:
+            log.warn(e)
+            spawn_box("Dump error", "Connection failed")
             return
-        self.spawn_box("Dump", f"Successfully done in {round(time() - t1, 2)}s", QMessageBox.Information)
+        spawn_box("Dump", f"Successfully done in {round(time() - t1, 2)}s",
+                        QMessageBox.Information)
         if open:
             if "linux" in sys.platform:
                 from os import spawnlp, P_NOWAIT
@@ -140,25 +143,33 @@ class MainWindow(QMainWindow, MainUI):
             elif sys.platform == "win32":
                 pass # TODO windows implementation
             else:
-                self.spawn_box("Dump open error", f"Unknown {sys.platform} operating system")
+                spawn_box("Dump open error", f"Unknown {sys.platform} operating system",
+                        QMessageBox.Critical)
 
     def on_chip_test(self):
         """ Test callback function """
+        baudrate = int(self.combo_Baudrate.currentText())
         try:
-            self.ram = RAM(quality_test=True)
-        except:
+            if self.ram is None:
+                self.ram = RAM(quality_test=True, timeout=1)
+            else:
+                self.ram = RAM(quality_test=True, timeout=1, baudrate=baudrate)
+        except Exception as e:
+            log.warn(e)
             self.ram = None
-            self.spawn_box("Test error", "Connection failed")
+            spawn_box("Test error", "Connection failed")
             return
-        self.spawn_box("RS232 test", "Successfully done")
+        spawn_box("RS232 test", f"Successfully done using port {self.ram.serial.port}",
+                     QMessageBox.Information)
 
     def on_baudrate_change(self):
         """ Baudrate change callback function """
         baudrate = int(self.combo_Baudrate.currentText())
         try:
             self.ram.change_baudrate(baudrate)
-        except:
-            self.spawn_box("Baudrate change error", "Connection failed")
+        except Exception as e:
+            log.warn(e)
+            spawn_box("Baudrate change error", "Connection failed")
 
 
 if __name__ == "__main__":
