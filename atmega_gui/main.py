@@ -10,6 +10,7 @@ import logging
 import sys
 
 from atmega.ram import RAM
+from atmega.ram import list_devices
 
 from atmega_gui.views.Fenetre_main_ui import Ui_Dialog as MainUI
 from atmega_gui.rx import RxWindow
@@ -31,12 +32,15 @@ class MainWindow(QMainWindow, MainUI):
             self.ram = RAM(timeout=1)
         except:
             self.ram = None
-            log.info("No ram found")
-            spawn_box("Connection error", "No device found", QMessageBox.Critical)
+            log.info("No ram found.")
+            # spawn_box("Connection error", "No device found", QMessageBox.Critical)
+        self.port = self.ram.serial.port
 
     def connectSignalsSlots(self):
         """ Implement all the actions on each component """
         # combos
+        self.resetPorts()
+        self.combo_Circuit_2.activated.connect(self.on_port_change)        
         self.combo_Circuit.activated.connect(self.on_device_change)
         self.combo_Baudrate.activated.connect(self.on_baudrate_change)
         # buttons
@@ -47,12 +51,24 @@ class MainWindow(QMainWindow, MainUI):
         self.btn_Ecrire.clicked.connect(self.on_write)
         self.btn_DumpRAM.clicked.connect(self.on_dump)
         self.btn_TestRS.clicked.connect(self.on_chip_test)
+        self.btn_Actualiser.clicked.connect(self.resetPorts)
         # validators
         hex_value_validator = QRegExpValidator(QtCore.QRegExp("[0-9A-Fa-f]{1,2}"))
         hex_addr_validator = QRegExpValidator(QtCore.QRegExp("[0-9A-Fa-f]{1,4}"))
         self.txt_Ecrire.setValidator(hex_value_validator)
         self.txt_InitRAM.setValidator(hex_value_validator)
         self.txt_Adresse.setValidator(hex_addr_validator)
+
+    def resetPorts(self):
+        devices = list_devices()
+        self.combo_Circuit_2.clear()
+        if len(devices) != 0:
+            self.port = devices[0]
+            self.combo_Circuit_2.removeItem(0)  # remove "No device" item
+        else:
+            self.combo_Circuit_2.addItem("Aucun port.")
+        for dev in devices:
+            self.combo_Circuit_2.addItem(dev)
 
     def closeWindow(self):
         """ Close all subwindows """
@@ -64,6 +80,10 @@ class MainWindow(QMainWindow, MainUI):
     def openRX(self):
         """ Open RX subwindow """
         self.RX_ui.show()
+
+    def on_port_change(self):
+        """ Device change callback function """
+        self.port = self.combo_Circuit_2.currentText()
 
     def on_device_change(self):
         """ Device change callback function """
@@ -149,19 +169,20 @@ class MainWindow(QMainWindow, MainUI):
     def on_chip_test(self):
         """ Test callback function """
         baudrate = int(self.combo_Baudrate.currentText())
+        self.port = self.combo_Circuit_2.currentText()
         try:
             if self.ram is None:
-                self.ram = RAM(quality_test=True, timeout=1)
+                self.ram = RAM(port=self.port, quality_test=True, timeout=1)
             else:
-                self.ram = RAM(quality_test=True, timeout=1, baudrate=baudrate)
+                self.ram = RAM(port=self.port, quality_test=True, timeout=1, baudrate=baudrate)
         except Exception as e:
             log.warn(e)
-        if self.ram.serial is not None:
-            spawn_box("RS232 test", f"Successfully done using port {self.ram.serial.port}",
+        if self.ram is not None and self.ram.serial.port is not None:
+            spawn_box("RS232 test", f"Successfully done using port {self.port}",
                      QMessageBox.Information)
         else:
             self.ram = None
-            spawn_box("RS232 test", f"Could not connect to device", QMessageBox.Warning)
+            spawn_box("RS232 test", f"Could not connect to device {self.port}", QMessageBox.Warning)
 
     def on_baudrate_change(self):
         """ Baudrate change callback function """
