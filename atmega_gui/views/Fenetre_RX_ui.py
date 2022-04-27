@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '../../resources/Fenetre_RX.ui'
+# Form implementation generated from reading ui file '../resources/qtui/Fenetre_RX.ui'
 #
 # Created by: PyQt5 UI code generator 5.12.3
 #
@@ -42,6 +42,15 @@ class Ui_Dialog(object):
         self.Affichage = QtWidgets.QTextBrowser(self.gridLayoutWidget)
         self.Affichage.setObjectName("Affichage")
         self.gridLayout.addWidget(self.Affichage, 0, 0, 1, 1)
+        self.voyant = QtWidgets.QOpenGLWidget(Dialog)
+        self.voyant.setGeometry(QtCore.QRect(680, 10, 51, 51))
+        self.voyant.setObjectName("voyant")
+        self.pgb = QtWidgets.QProgressBar(Dialog)
+        self.pgb.setEnabled(True)
+        self.pgb.setGeometry(QtCore.QRect(650, 80, 171, 16))
+        self.pgb.setProperty("value", 0)
+        self.pgb.setTextVisible(False)
+        self.pgb.setObjectName("pgb")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
