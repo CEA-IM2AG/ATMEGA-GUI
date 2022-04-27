@@ -156,11 +156,12 @@ class MainWindow(QMainWindow, MainUI):
                 self.ram = RAM(quality_test=True, timeout=1, baudrate=baudrate)
         except Exception as e:
             log.warn(e)
-            self.ram = None
-            spawn_box("Test error", "Connection failed")
-            return
-        spawn_box("RS232 test", f"Successfully done using port {self.ram.serial.port}",
+        if self.ram.serial is not None:
+            spawn_box("RS232 test", f"Successfully done using port {self.ram.serial.port}",
                      QMessageBox.Information)
+        else:
+            self.ram = None
+            spawn_box("RS232 test", f"Could not connect to device", QMessageBox.Warning)
 
     def on_baudrate_change(self):
         """ Baudrate change callback function """
