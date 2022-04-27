@@ -6,15 +6,56 @@ from atmega.ram import RAM
 from time import sleep, time
 from sys import platform
 from time import gmtime, strftime
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QMessageBox
 import os
 
 if platform == "win32":
     import winsound # TODO unix equivalent
 
+def spawn_box(title, text, icon=QMessageBox.Warning):
+    """
+        Spawn a message box
+        :param title: title of the message box
+        :param text: text of the message box
+        :param icon: icon of the message box
+    """
+    box = QMessageBox()
+    box.setWindowTitle(title)
+    box.setText(text)
+    box.setIcon(icon)
+    box.exec()
+
+
+class TextSignal(QtCore.QObject):
+    """ Output signal """
+    output = QtCore.pyqtSignal(str)
+
+
+class TextWorker(QtCore.QThread):
+    """ Worker that emit text output """
+    def __init__(self, fn, *args, **kwargs):
+        super().__init__()
+        self.signal = TextSignal()
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.kwargs['output'] = self.signal.output
+
+    @QtCore.pyqtSlot()
+    def run(self):
+        self.fn(*self.args, **self.kwargs)
+
+class FallbackOutput:
+    """ Fallback output for the script reader """
+    @staticmethod
+    def emit(*args, **kwargs):
+        print(*args, **kwargs)
+
 
 class ScriptExe:
     """ Script reader """
-    def __init__(self, device=None, log_function=None):
+    def __init__(self, device=None):
         """
             Initialisation of the script executer with callback functions.
             :param device: device that will perform the commands
@@ -22,19 +63,20 @@ class ScriptExe:
         """
         if device is None:
             device = RAM()
-        if log_function is None:
-            log_function = print
         self.ram = device
-        self.log = log_function
         self.stop = False
+        self.running = False
+        self.pause = False
 
     def on_error_stop(self):
         """ Stop the execution of the script """
         play_sound()
         self.ram.close()
 
-    def exec_file(self, file):
+    def exec_file(self, file, output=None):
         """ Execute a script """
+        if output is None:
+            output = FallbackOutput
         lines = open_file(file)
         start_time = time()
         first_iteration = True
@@ -43,9 +85,11 @@ class ScriptExe:
         last_comp = False
         counter = 1
         while not self.stop and (first_iteration or looping):
+            while self.pause: # Paused
+                sleep(0.2)
             current_time = round(time() - start_time, 2)
-            self.log(f"Passe n⁰{counter}")
-            self.log(f"Temps cumulé {current_time}s")
+            output.emit(f"Passe n⁰{counter}")
+            output.emit(f"Temps cumulé {current_time}s")
             for line in lines:
                 subline = line.split()
                 command = subline[0]
@@ -53,16 +97,16 @@ class ScriptExe:
                 nb_arg = len(arg)
 
                 if command == "CONNECT":
-                    pass # TODO
+                    pass # Class already connected
 
                 elif command == "INIT_RAM":
                     if not first_iteration and not inside_loop:
                         continue
                     if nb_arg not in [1, 2]:
-                        self.log("Invalid number of arguments")
+                        output.emit("Invalid number of arguments")
                         self.on_error_stop()
                         return
-                    self.log(line)
+                    output.emit(line)
                     value = int(arg[0], base=16)
                     complement = False
                     increment = False
@@ -71,18 +115,18 @@ class ScriptExe:
                         increment = "INCR" in arg[1]
                     try:
                         self.ram.reset(value, increment, complement)
-                        self.log("OK")
+                        output.emit("OK")
                     except:
-                        self.log("Reset error")
+                        output.emit("Reset error")
                         self.on_error_stop()
                         return
 
                 elif command == "LIRE_RAM":
                     if not first_iteration and not inside_loop:
                         continue
-                    self.log(line)
+                    output.emit(line)
                     if nb_arg not in [1, 2]:
-                        self.log("Invalid number of arguments")
+                        output.emit("Invalid number of arguments")
                         self.on_error_stop()
                         return
                     reserve_stack = int(arg[0])
@@ -90,18 +134,18 @@ class ScriptExe:
                     if nb_arg == 2:
                         block_size = int(arg[1])
                     try:
-                        self.ram.dump_to_file("dump.txt", reserve_stack, block_size)
+                        self.ram.dump_to_file("Dump_RAM.txt", reserve_stack, block_size)
                     except:
-                        self.log("Error on ram dump")
+                        output.emit("Error on ram dump")
                         self.on_error_stop()
                         return
 
                 elif command == "COPY":
                     if not first_iteration and not inside_loop:
                         continue
-                    self.log(line)
+                    output.emit(line)
                     if nb_arg not in [2, 3]:
-                        self.log("Invalid number of arguments")
+                        output.emit("Invalid number of arguments")
                         self.on_error_stop()
                         return
                     increment = False
@@ -115,27 +159,27 @@ class ScriptExe:
                 elif command == "BAUDRATE":
                     if not first_iteration and not inside_loop:
                         continue
-                    self.log(line)
+                    output.emit(line)
                     if nb_arg != 1:
-                        self.log("Invalid number of arguments")
+                        output.emit("Invalid number of arguments")
                         self.on_error_stop()
                         return
                     baudrate = int(arg[0])
                     try:
                         self.ram.change_baudrate(baudrate)
-                        self.log("Baudrate OK")
+                        output.emit("Baudrate OK")
                     except:
-                        self.log("Error on baudrate change")
+                        output.emit("Error on baudrate change")
 
                 elif command == "WAIT_SYNC":
-                    pass
+                    pass # Everything is synched by the API
 
                 elif command == "COMP":
                     if not first_iteration and not inside_loop:
                         continue
-                    self.log(line)
+                    output.emit(line)
                     if nb_arg not in [2, 3]:
-                        self.log("Invalid number of arguments")
+                        output.emit("Invalid number of arguments")
                         self.on_error_stop()
                         return
 
@@ -148,49 +192,49 @@ class ScriptExe:
                     nb_error = compare(arg[0], arg[1])
                     last_comp = nb_error > 0
                     if nb_error:
-                        self.log(f"Found {nb_error} differences")
+                        output.emit(f"Found {nb_error} differences")
                         if beep_on_error:
                             frequency = 2500  # Set Frequency To 2500 Hertz
                             duration = 1000   # Set Duration To 1000 ms= 1 seconde
                             play_sound(frequency, duration)
                         elif stop_on_error:
-                            self.log("Error. Stopping the script")
+                            output.emit("Error. Stopping the script")
                             self.on_error_stop()
                             return
                     else:
-                        self.log("Fichiers identiques")
+                        output.emit("Fichiers identiques")
 
                 elif command == "DEBLOOP":
                     if nb_arg != 0:
-                        self.log("Invalid number of arguments")
+                        output.emit("Invalid number of arguments")
                         self.on_error_stop()
                         return
-                    self.log(line)
-                    looping = True
+                    output.emit(line)
+                    inside_loop = True
 
                 elif command == "LOOP":
                     if nb_arg not in [1, 3]:
-                        self.log("Invalid number of arguments")
+                        output.emit("Invalid number of arguments")
                         self.on_error_stop()
                         return
-                    self.log(line)
-                    sleep(arg[0])
+                    output.emit(line)
+                    sleep(float(arg[0]))
                     if nb_arg == 3:
                         if arg[1] != "PENDANT":
-                            self.log("Invalid argument")
+                            output.emit("Invalid argument")
                             self.on_error_stop()
                             return
                         max_time = int(arg[2])
-                        looping = time() - start_time > max_time
+                        looping = time() - start_time < max_time
 
                 elif command == "MEM_INIT_OK":
-                    pass
+                    pass # error raised in INIT_RAM
 
                 elif command == "SEND_RES":
-                    pass
+                    pass # Socked not implemented TODO?
 
                 else:
-                    self.log(f"Unknown command: {command}")
+                    output.emit(f"Unknown command: {command}")
                     self.on_error_stop()
                     return
 
