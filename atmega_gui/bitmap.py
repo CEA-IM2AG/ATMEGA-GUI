@@ -76,3 +76,13 @@ def print_bitmap(matrix, zoom=False):
     plt.imshow(colors)
     plt.axis('off')
     plt.show()
+
+
+if __name__ == "__main__":
+    X = [[0 for i in range(32)] for j in range(32)]
+    X[5][5] = 1
+    X[5][6] = 2
+    X[6][5] = 3
+    X[6][6] = 1
+    X[12][14] = 3
+    print_bitmap(X, zoom = True)
