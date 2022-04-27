@@ -51,6 +51,7 @@ class MainWindow(QMainWindow, MainUI):
         self.btn_Ecrire.clicked.connect(self.on_write)
         self.btn_DumpRAM.clicked.connect(self.on_dump)
         self.btn_TestRS.clicked.connect(self.on_chip_test)
+        self.btn_Actualiser.clicked.connect(self.resetPorts)
         # validators
         hex_value_validator = QRegExpValidator(QtCore.QRegExp("[0-9A-Fa-f]{1,2}"))
         hex_addr_validator = QRegExpValidator(QtCore.QRegExp("[0-9A-Fa-f]{1,4}"))
@@ -60,11 +61,14 @@ class MainWindow(QMainWindow, MainUI):
 
     def resetPorts(self):
         devices = list_devices()
-        for dev in devices:
-            self.combo_Circuit_2.addItem(dev)
+        self.combo_Circuit_2.clear()
         if len(devices) != 0:
             self.port = devices[0]
             self.combo_Circuit_2.removeItem(0)  # remove "No device" item
+        else:
+            self.combo_Circuit_2.addItem("Aucun port.")
+        for dev in devices:
+            self.combo_Circuit_2.addItem(dev)
 
     def closeWindow(self):
         """ Close all subwindows """
