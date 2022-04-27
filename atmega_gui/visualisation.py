@@ -15,18 +15,21 @@ class Window(QMainWindow, visualisationUI):
     def connectSignalsSlots(self):
         # TODO
         self.btn_Load.clicked.connect(self.on_load)
+        self.btn_ChargFich.connect(self.load_fich)
         pass
 
     def on_load(self):
-        """matrix = [[0 for i in range(32)] for j in range(32)]
-        matrix[4][5] = 1
-        matrix[7][9] = 3"""
         glist = [0 for i in range(1024)]
         compare("dump1.txt", "dump2.txt", glist)
         matrix = [glist[i*32:(i+1)*32] for i in range(32)]
         matrix[5][7] = 3
         print_bitmap(matrix, self.check_Zoom.isChecked())
 
+    def load_fich(self):
+        """ Callback that update the filename text field """
+        file_name = QFileDialog.getOpenFileName(
+            None, "", "", "Dumps (*.txt)")[0]
+        self.txt_Path.setText(file_name)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
