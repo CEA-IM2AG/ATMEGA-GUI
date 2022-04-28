@@ -10,15 +10,15 @@ from atmega_gui.visualisation import VisualizationUI
 
 from atmega_gui.util import ScriptExe, TextWorker
 from atmega_gui.util import spawn_box, play_sound
-from atmega_gui.variable import device
+
+import atmega_gui.variable as variable
 
 class RxWindow(QMainWindow, rxUI):
-    def __init__(self, device, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        device = device
         self.setupUi(self)
         self.connectSignalsSlots()
-        self.script_exe = ScriptExe(device)
+        self.script_exe = ScriptExe()
         self.worker = None
         self.visualisation_ui = VisualizationUI(self)
         # List of diff of the current session
@@ -68,7 +68,7 @@ class RxWindow(QMainWindow, rxUI):
 
     def on_start(self):
         """ Start callback function """
-        if device is None:
+        if variable.device is None:
             spawn_box("Error", f"Script execution failed:\n\nNo device selected", QMessageBox.Warning)
             return
         
