@@ -50,6 +50,9 @@
    <property name="text">
     <string>Résultat enregistré</string>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QLineEdit" name="txt_Path">
    <property name="geometry">
@@ -113,6 +116,9 @@
     </property>
     <property name="text">
      <string>Incrémentale</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QCheckBox" name="check_Zoom">
