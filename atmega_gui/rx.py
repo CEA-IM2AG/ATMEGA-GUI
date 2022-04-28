@@ -2,6 +2,7 @@
 
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from atmega_gui.main import MainWindow
 from atmega_gui.views.Fenetre_RX_ui import Ui_Dialog as rxUI
 from atmega_gui.visualisation import VisualizationUI
 from atmega_gui.util import ScriptExe, TextWorker
@@ -10,11 +11,12 @@ from atmega_gui.util import spawn_box, play_sound
 
 
 class RxWindow(QMainWindow, rxUI):
-    def __init__(self, parent=None):
+    def __init__(self, device, parent=None):
         super().__init__(parent)
+        self.device = device
         self.setupUi(self)
         self.connectSignalsSlots()
-        self.script_exe = ScriptExe()
+        self.script_exe = ScriptExe(self.device.ram_size)
         self.worker = None
         self.visualisation_ui = VisualizationUI(self)
 
@@ -66,7 +68,7 @@ class RxWindow(QMainWindow, rxUI):
         self.visualisation_ui.show()
         if filename:
             self.worker = TextWorker(
-                    lambda *args, **kwargs: self.script_exe.exec_file(*args, **kwargs), filename)
+                    lambda *args, **kwargs: self.script_exe.exec_file(*args, **kwargs), filename, self.device)
             self.worker.signal.output.connect(self.Affichage.append)
             self.worker.sound.output.connect(play_sound)
             self.worker.started.connect(self.on_script_start)

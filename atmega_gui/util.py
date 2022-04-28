@@ -56,26 +56,22 @@ class FallbackOutput:
 
 class ScriptExe:
     """ Script reader """
-    def __init__(self, device=None):
+    def __init__(self, ram_size):
         """
             Initialisation of the script executer with callback functions.
-            :param device: device that will perform the commands
+            :param ram_size: device that will perform the commands
             :param log_function: callback function that will be called on errors
         """
-        if device is None:
-            device = RAM()
-        self.ram = device
         self.stop = False
         self.running = False
         self.pause = False
-        self.glist = [0]*(device.ram_size - 40)*8
+        self.glist = [0]*(ram_size - 40)*8
 
     def on_error_stop(self, sound):
         """ Stop the execution of the script """
         sound.emit("error")
-        self.ram.close()
 
-    def exec_file(self, file, output=None, sound=None):
+    def exec_file(self, file, device, output=None, sound=None):
         """ Execute a script """
         if output is None:
             output = FallbackOutput
@@ -118,7 +114,7 @@ class ScriptExe:
                         complement = "COMP" in arg[1]
                         increment = "INCR" in arg[1]
                     try:
-                        self.ram.reset(value, increment, complement)
+                        device.reset(value, increment, complement)
                         output.emit("OK")
                     except:
                         output.emit("Reset error")
@@ -138,7 +134,7 @@ class ScriptExe:
                     if nb_arg == 2:
                         block_size = int(arg[1])
                     try:
-                        self.ram.dump_to_file("Dump_RAM.txt", reserve_stack, block_size)
+                        device.dump_to_file("Dump_RAM.txt", reserve_stack, block_size)
                     except:
                         output.emit("Error on ram dump")
                         self.on_error_stop(sound)
@@ -170,7 +166,7 @@ class ScriptExe:
                         return
                     baudrate = int(arg[0])
                     try:
-                        self.ram.change_baudrate(baudrate)
+                        device.change_baudrate(baudrate)
                         output.emit("Baudrate OK")
                     except:
                         output.emit("Error on baudrate change")
