@@ -452,7 +452,7 @@ def write_index(index_list):
         raise Exception("Could not open file")
 
     for file in index_list:
-        f.write(file)
+        f.write(f"{file}\n")
     f.close
     return dest_name
 
