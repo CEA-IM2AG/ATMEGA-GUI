@@ -1,15 +1,19 @@
 """
     Utils for memory scripting
 """
-
-from atmega.ram import RAM
-from time import sleep, time
-from time import gmtime, strftime
-from PyQt5 import QtCore, QtMultimedia
-from PyQt5.QtWidgets import QMessageBox
-import atmega_gui
 from os import path
 from math import log2, floor, ceil
+
+from time import sleep, time
+from time import gmtime, strftime
+
+from PyQt5 import QtCore, QtMultimedia
+from PyQt5.QtWidgets import QMessageBox
+
+from atmega.ram import RAM
+
+import atmega_gui
+from atmega_gui.variable import device
 
 
 def spawn_box(title, text, icon=QMessageBox.Warning):
@@ -73,7 +77,7 @@ class ScriptExe:
             :param ram_size: device that will perform the commands
             :param log_function: callback function that will be called on errors
         """
-        self.device = device
+        device = device
         self.stop = False
         self.running = False
         self.pause = False
@@ -88,8 +92,8 @@ class ScriptExe:
                   output=FallbackOutput, sound=FallbackOutput,
                   indicator=FallbackOutput, progress=FallbackOutput, new_diff=FallbackOutput):
         """ Execute a script """
-        self.incremental_list = [0]*(self.device.ram_size)*8
-        self.differential_list = [0]*(self.device.ram_size)*8
+        self.incremental_list = [0]*(device.ram_size)*8
+        self.differential_list = [0]*(device.ram_size)*8
         lines = open_file(file)
         start_time = time()
         first_iteration = True
@@ -139,7 +143,7 @@ class ScriptExe:
                         complement = "COMP" in arg[1]
                         increment = "INCR" in arg[1]
                     try:
-                        self.device.reset(value, increment, complement)
+                        device.reset(value, increment, complement)
                         output.emit("OK")
                     except:
                         output.emit("Reset error")
@@ -159,7 +163,7 @@ class ScriptExe:
                     if nb_arg == 2:
                         block_size = int(arg[1])
                     try:
-                        self.device.dump_to_file("Dump_RAM.txt", reserve_stack, block_size)
+                        device.dump_to_file("Dump_RAM.txt", reserve_stack, block_size)
                     except:
                         output.emit("Error on ram dump")
                         self.on_error_stop(sound)
@@ -191,7 +195,7 @@ class ScriptExe:
                         return
                     baudrate = int(arg[0])
                     try:
-                        self.device.change_baudrate(baudrate)
+                        device.change_baudrate(baudrate)
                         output.emit("Baudrate OK")
                     except:
                         output.emit("Error on baudrate change")

@@ -1,21 +1,24 @@
 """ RX scripting window """
 
 import sys
+
+from PyQt5.QtWidgets import QMessageBox, QLabel
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+
 from atmega_gui.views.Fenetre_RX_ui import Ui_Dialog as rxUI
 from atmega_gui.visualisation import VisualizationUI
-from atmega_gui.util import ScriptExe, TextWorker
-from PyQt5.QtWidgets import QMessageBox, QLabel
-from atmega_gui.util import spawn_box, play_sound
 
+from atmega_gui.util import ScriptExe, TextWorker
+from atmega_gui.util import spawn_box, play_sound
+from atmega_gui.variable import device
 
 class RxWindow(QMainWindow, rxUI):
     def __init__(self, device, parent=None):
         super().__init__(parent)
-        self.device = device
+        device = device
         self.setupUi(self)
         self.connectSignalsSlots()
-        self.script_exe = ScriptExe(self.device)
+        self.script_exe = ScriptExe(device)
         self.worker = None
         self.visualisation_ui = VisualizationUI(self)
         # List of diff of the current session
@@ -65,7 +68,7 @@ class RxWindow(QMainWindow, rxUI):
 
     def on_start(self):
         """ Start callback function """
-        if self.device is None:
+        if device is None:
             spawn_box("Error", f"Script execution failed:\n\nNo device selected", QMessageBox.Warning)
             return
         
