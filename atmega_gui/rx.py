@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from atmega_gui.views.Fenetre_RX_ui import Ui_Dialog as rxUI
 from atmega_gui.visualisation import VisualizationUI
 from atmega_gui.util import ScriptExe, TextWorker
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QLabel
 from atmega_gui.util import spawn_box, play_sound
 
 
@@ -20,10 +20,24 @@ class RxWindow(QMainWindow, rxUI):
 
     def connectSignalsSlots(self):
         """ Implement all the actions on each component """
+        # Buttons
         self.btn_Demarer.clicked.connect(self.on_start)
         self.btn_Pause.clicked.connect(self.on_pause)
         self.btn_Stop.clicked.connect(self.on_stop)
         self.btn_Browse.clicked.connect(self.on_load)
+        # Light indicator
+        self.indicator = QLabel(' ', self)
+        self.indicator.move(700, 15)
+        self.indicator.resize(40, 40)
+        self.change_indicator("green")
+
+    def change_indicator(self, color):
+        """
+            Change the color of the indicator.
+            :param color: The color to set
+        """
+        self.indicator.setStyleSheet(
+                f"background-color: {color}; border-radius: 20%")
 
     def on_script_start(self):
         """ Callback called when the script is started """

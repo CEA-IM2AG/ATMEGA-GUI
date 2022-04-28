@@ -70,7 +70,7 @@ class ScriptExe:
         self.pause = False
         self.glist = [0]*(device.ram_size - 40)*8
 
-    def on_error_stop(self):
+    def on_error_stop(self, sound):
         """ Stop the execution of the script """
         sound.emit("error")
         self.ram.close()
@@ -108,7 +108,7 @@ class ScriptExe:
                         continue
                     if nb_arg not in [1, 2]:
                         output.emit("Invalid number of arguments")
-                        self.on_error_stop()
+                        self.on_error_stop(sound)
                         return
                     output.emit(line)
                     value = int(arg[0], base=16)
@@ -122,7 +122,7 @@ class ScriptExe:
                         output.emit("OK")
                     except:
                         output.emit("Reset error")
-                        self.on_error_stop()
+                        self.on_error_stop(sound)
                         return
 
                 elif command == "LIRE_RAM":
@@ -131,7 +131,7 @@ class ScriptExe:
                     output.emit(line)
                     if nb_arg not in [1, 2]:
                         output.emit("Invalid number of arguments")
-                        self.on_error_stop()
+                        self.on_error_stop(sound)
                         return
                     reserve_stack = int(arg[0])
                     block_size = 64
@@ -141,7 +141,7 @@ class ScriptExe:
                         self.ram.dump_to_file("Dump_RAM.txt", reserve_stack, block_size)
                     except:
                         output.emit("Error on ram dump")
-                        self.on_error_stop()
+                        self.on_error_stop(sound)
                         return
 
                 elif command == "COPY":
@@ -150,7 +150,7 @@ class ScriptExe:
                     output.emit(line)
                     if nb_arg not in [2, 3]:
                         output.emit("Invalid number of arguments")
-                        self.on_error_stop()
+                        self.on_error_stop(sound)
                         return
                     increment = False
                     diff_only = False
@@ -166,7 +166,7 @@ class ScriptExe:
                     output.emit(line)
                     if nb_arg != 1:
                         output.emit("Invalid number of arguments")
-                        self.on_error_stop()
+                        self.on_error_stop(sound)
                         return
                     baudrate = int(arg[0])
                     try:
@@ -184,7 +184,7 @@ class ScriptExe:
                     output.emit(line)
                     if nb_arg not in [2, 3]:
                         output.emit("Invalid number of arguments")
-                        self.on_error_stop()
+                        self.on_error_stop(sound)
                         return
 
                     beep_on_error = False
@@ -201,7 +201,7 @@ class ScriptExe:
                             sound.emit("ding_dong")
                         elif stop_on_error:
                             output.emit("Error. Stopping the script")
-                            self.on_error_stop()
+                            self.on_error_stop(sound)
                             return
                     else:
                         output.emit("Fichiers identiques")
@@ -209,7 +209,7 @@ class ScriptExe:
                 elif command == "DEBLOOP":
                     if nb_arg != 0:
                         output.emit("Invalid number of arguments")
-                        self.on_error_stop()
+                        self.on_error_stop(sound)
                         return
                     output.emit(line)
                     inside_loop = True
@@ -217,14 +217,14 @@ class ScriptExe:
                 elif command == "LOOP":
                     if nb_arg not in [1, 3]:
                         output.emit("Invalid number of arguments")
-                        self.on_error_stop()
+                        self.on_error_stop(sound)
                         return
                     output.emit(line)
                     sleep(float(arg[0]))
                     if nb_arg == 3:
                         if arg[1] != "PENDANT":
                             output.emit("Invalid argument")
-                            self.on_error_stop()
+                            self.on_error_stop(sound)
                             return
                         max_time = int(arg[2])
                         looping = time() - start_time < max_time
@@ -237,7 +237,7 @@ class ScriptExe:
 
                 else:
                     output.emit(f"Unknown command: {command}")
-                    self.on_error_stop()
+                    self.on_error_stop(sound)
                     return
 
             first_iteration = False
