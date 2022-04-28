@@ -103,6 +103,8 @@ class RxWindow(QMainWindow, rxUI):
         """
         self.session_diffs.append(filename)
         self.visualisation_ui.current_diff = filename
+        if self.visualisation_ui.radio_ResCourant.isChecked():
+            self.visualisation_ui.lbl_ImagesTotal.setText("/ "+str(len(self.session_diffs)))
 
     def on_pause(self):
         """ Pause callback function """

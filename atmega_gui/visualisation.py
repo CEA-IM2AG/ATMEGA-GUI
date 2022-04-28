@@ -57,6 +57,7 @@ class VisualizationUI(QMainWindow, visualisationUI):
         """ Callback called when current result is checked """
         if self.radio_ResCourant.isChecked():
             self.saved_diff = self.session_diffs
+            self.lbl_ImagesTotal.setText("/ "+str(len(self.session_diffs)))
 
     def on_save_all(self):
         """ Save all the diffs """
@@ -91,6 +92,7 @@ class VisualizationUI(QMainWindow, visualisationUI):
             self.txt_ChoixImage.setText("1")
 
         self.saved_diff = index_list
+        self.lbl_ImagesTotal.setText("/ "+str(len(self.saved_diff)))
 
     def on_prev(self):
         """ Callback that updates the frame """
