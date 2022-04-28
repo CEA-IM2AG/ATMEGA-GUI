@@ -2,7 +2,6 @@
 
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
-from atmega_gui.main import MainWindow
 from atmega_gui.views.Fenetre_RX_ui import Ui_Dialog as rxUI
 from atmega_gui.visualisation import VisualizationUI
 from atmega_gui.util import ScriptExe, TextWorker
@@ -16,7 +15,7 @@ class RxWindow(QMainWindow, rxUI):
         self.device = device
         self.setupUi(self)
         self.connectSignalsSlots()
-        self.script_exe = ScriptExe(self.device.ram_size)
+        self.script_exe = ScriptExe(self.device)
         self.worker = None
         self.visualisation_ui = VisualizationUI(self)
         # List of diff of the current session
@@ -61,6 +60,10 @@ class RxWindow(QMainWindow, rxUI):
 
     def on_start(self):
         """ Start callback function """
+        if self.device is None:
+            spawn_box("Error", f"Script execution failed:\n\nNo device selected", QMessageBox.Warning)
+            return
+        
         if self.script_exe.running:
             spawn_box("Script reader", "A script is running. Cannot start a new one",
                         QMessageBox.Warning)
@@ -74,7 +77,7 @@ class RxWindow(QMainWindow, rxUI):
         if filename and not filename.isspace():
             # Creation of another thread
             self.worker = TextWorker(
-                    lambda *args, **kwargs: self.script_exe.exec_file(*args, **kwargs), filename, self.device)
+                            lambda *args, **kwargs: self.script_exe.exec_file(*args, **kwargs), filename)
             self.worker.signal.output.connect(self.Affichage.append)
             self.worker.sound.output.connect(play_sound)
             self.worker.indicator.output.connect(self.change_indicator)

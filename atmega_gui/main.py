@@ -40,7 +40,7 @@ class MainWindow(QMainWindow, MainUI):
             log.info("No FTDI device found.")
             # spawn_box("Connection error", "No device found", QMessageBox.Critical)
         # RX subwindow
-        self.RX_ui = RxWindow(self, self.ram)
+        self.RX_ui = RxWindow(self.ram, self)
 
     def connectSignalsSlots(self):
         """ Implement all the actions on each component """
