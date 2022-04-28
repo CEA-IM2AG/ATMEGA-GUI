@@ -194,43 +194,17 @@
     <string>/</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="btn_SaveImage">
-   <property name="geometry">
-    <rect>
-     <x>660</x>
-     <y>160</y>
-     <width>151</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Enregistrer image</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="btn_SaveTout">
    <property name="geometry">
     <rect>
      <x>660</x>
-     <y>210</y>
+     <y>170</y>
      <width>151</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
     <string>Tout enregistrer</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn_Graph">
-   <property name="geometry">
-    <rect>
-     <x>660</x>
-     <y>110</y>
-     <width>151</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Graphique de fautes</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btn_PlayPause">
