@@ -222,8 +222,10 @@ class ScriptExe:
                     # Incremental diff
                     compare(arg[0], arg[1], self.incremental_list)
 
-                    current_name = write_diff(self.differential_list, self.incremental_list)
-                    new_diff.emit(current_name)
+                    # Write the diffs if there are diffs
+                    if last_comp:
+                        current_name = write_diff(self.differential_list, self.incremental_list)
+                        new_diff.emit(current_name)
 
                     if nb_error:
                         output.emit(f"Found {nb_error} differences")
@@ -333,7 +335,7 @@ def copy(source, dest, increment):
     """
     dest_name = dest
     if increment:
-        date_incr = strftime("%d_%b_%Y_a_%HH%M", gmtime()).upper()
+        date_incr = strftime("%d_%b_%Y_a_%HH%MM%SS", gmtime()).upper()
         extless_dest = dest.replace(".txt", "")
         dest_name = extless_dest + '_' + date_incr + '.txt'
     try:
@@ -369,7 +371,7 @@ def write_diff(diff_l, incr_l):
         :return: the name of the created file
     """
     # Fichier output
-    date_incr = strftime("%d_%b_%Y_a_%HH%M", gmtime()).upper()
+    date_incr = strftime("%d_%b_%Y_a_%HH%MM%SS", gmtime()).upper()
     dest_name = date_incr + "_diff.txt"
     try:
         f = open(dest_name, "w+")
