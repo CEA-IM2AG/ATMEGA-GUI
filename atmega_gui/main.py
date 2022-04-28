@@ -2,7 +2,7 @@
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QComboBox
 
 from time import time
 
@@ -25,16 +25,22 @@ class MainWindow(QMainWindow, MainUI):
         super().__init__(parent)
         self.setupUi(self)
         self.connectSignalsSlots()
-        # RX subwindow
-        self.RX_ui = RxWindow(self)
         # Connection à la carte
+        self.port = None
         try:
             self.ram = RAM(timeout=1)
+            self.port = self.ram.serial.port
+            self.combo_Circuit_2.setInsertPolicy(QComboBox.InsertAtTop)
+            index = self.combo_box.findText(self.port)
+            self.combo_Circuit_2.removeItem(index)
+            self.combo_Circuit_2.addItem(self.port)
+            self.combo_Circuit_2.setInsertPolicy(QComboBox.InsertAtBottom)
         except:
             self.ram = None
-            log.info("No ram found.")
+            log.info("No FTDI device found.")
             # spawn_box("Connection error", "No device found", QMessageBox.Critical)
-        self.port = self.ram.serial.port
+        # RX subwindow
+        self.RX_ui = RxWindow(self, self.ram)
 
     def connectSignalsSlots(self):
         """ Implement all the actions on each component """
@@ -67,8 +73,7 @@ class MainWindow(QMainWindow, MainUI):
             self.combo_Circuit_2.removeItem(0)  # remove "No device" item
         else:
             self.combo_Circuit_2.addItem("Aucun port.")
-        for dev in devices:
-            self.combo_Circuit_2.addItem(dev)
+        self.combo_Circuit_2.addItems(devices)
 
     def closeWindow(self):
         """ Close all subwindows """
@@ -106,7 +111,7 @@ class MainWindow(QMainWindow, MainUI):
             self.ram.reset(value, increment, complement)
         except Exception as e:
             log.warn(e)
-            spawn_box("Reset error", "Connection failed")
+            spawn_box(f"Reset error:\n\n{e}", "Connection failed")
             return
         spawn_box("Reset", "Successfully done", QMessageBox.Information)
 
@@ -114,14 +119,14 @@ class MainWindow(QMainWindow, MainUI):
         """ Read callback function """
         str_address = self.txt_Adresse.text()
         if not str_address:
-            spawn_box("Read error", "Empty address")
+            spawn_box(f"Read error\n\n{e}", "Empty address")
             return
         address = int(str_address, base=16)
         try:
             val = self.ram.read(address)
         except Exception as e:
             log.warn(e)
-            spawn_box("Read error", "Connection failed")
+            spawn_box(f"Read error\n\n{e}", "Connection failed")
             return
         self.txt_Lire.setText(hex(val))
 
@@ -130,17 +135,17 @@ class MainWindow(QMainWindow, MainUI):
         str_address = self.txt_Adresse.text()
         str_value = self.txt_Ecrire.text()
         if not str_address:
-            spawn_box("Write error", "Empty address")
+            spawn_box(f"Write error\n\n{e}", "Empty address")
             return
         if not str_value:
-            spawn_box("Write error", "Empty value")
+            spawn_box(f"Write error\n\n{e}", "Empty value")
             return
         address = int(str_address, base=16)
         value = int(str_value, base=16)
         try:
             self.ram.write(value, address)
-        except:
-            spawn_box("Write error", "Connection failed")
+        except Exception as e:
+            spawn_box(f"Write error\n\n{e}", "Connection failed")
 
     def on_dump(self):
         """ Dump callback function """
@@ -151,7 +156,7 @@ class MainWindow(QMainWindow, MainUI):
             self.ram.dump_to_file("dump.txt")
         except Exception as e:
             log.warn(e)
-            spawn_box("Dump error", "Connection failed")
+            spawn_box(f"Dump error\n\n{e}", "Connection failed")
             return
         spawn_box("Dump", f"Successfully done in {round(time() - t1, 2)}s",
                         QMessageBox.Information)
@@ -162,7 +167,7 @@ class MainWindow(QMainWindow, MainUI):
             elif sys.platform == "win32":
                 pass # TODO windows implementation
             else:
-                spawn_box("Dump open error", f"Unknown {sys.platform} operating system",
+                spawn_box(f"Dump open error\n\n{e}", f"Unknown {sys.platform} operating system",
                         QMessageBox.Critical)
 
     def on_chip_test(self):
@@ -176,12 +181,13 @@ class MainWindow(QMainWindow, MainUI):
                 self.ram = RAM(port=self.port, quality_test=True, timeout=1, baudrate=baudrate)
         except Exception as e:
             log.warn(e)
-        if self.ram is not None and self.ram.serial.port is not None:
-            spawn_box("RS232 test", f"Successfully done using port {self.port}",
-                     QMessageBox.Information)
-        else:
             self.ram = None
-            spawn_box("RS232 test", f"Could not connect to device {self.port}", QMessageBox.Warning)
+            spawn_box("RS232 test", f"Could not connect to device {self.port}:\n\n{e}", QMessageBox.Warning)
+            return
+        if self.ram is None or self.ram.port is None:
+            spawn_box("RS232 test", f"Successfully done using port {self.port}",
+                      QMessageBox.Information)
+            
 
     def on_baudrate_change(self):
         """ Baudrate change callback function """
@@ -190,7 +196,7 @@ class MainWindow(QMainWindow, MainUI):
             self.ram.change_baudrate(baudrate)
         except Exception as e:
             log.warn(e)
-            spawn_box("Baudrate change error", "Connection failed")
+            spawn_box(f"Baudrate change error\n\n{e}", "Connection failed")
 
 
 if __name__ == "__main__":
