@@ -111,7 +111,7 @@ class MainWindow(QMainWindow, MainUI):
             self.ram.reset(value, increment, complement)
         except Exception as e:
             log.warn(e)
-            spawn_box(f"Reset error:\n\n{e}", "Connection failed")
+            spawn_box("Reset error", f"Connection failed\n\n{e}")
             return
         spawn_box("Reset", "Successfully done", QMessageBox.Information)
 
@@ -119,14 +119,14 @@ class MainWindow(QMainWindow, MainUI):
         """ Read callback function """
         str_address = self.txt_Adresse.text()
         if not str_address:
-            spawn_box(f"Read error\n\n{e}", "Empty address")
+            spawn_box("Read error", "Empty address")
             return
         address = int(str_address, base=16)
         try:
             val = self.ram.read(address)
         except Exception as e:
             log.warn(e)
-            spawn_box(f"Read error\n\n{e}", "Connection failed")
+            spawn_box("Read error", f"Connection failed\n\n{e}")
             return
         self.txt_Lire.setText(hex(val))
 
@@ -135,17 +135,17 @@ class MainWindow(QMainWindow, MainUI):
         str_address = self.txt_Adresse.text()
         str_value = self.txt_Ecrire.text()
         if not str_address:
-            spawn_box(f"Write error\n\n{e}", "Empty address")
+            spawn_box("Write error", "Empty address")
             return
         if not str_value:
-            spawn_box(f"Write error\n\n{e}", "Empty value")
+            spawn_box("Write error", "Empty value")
             return
         address = int(str_address, base=16)
         value = int(str_value, base=16)
         try:
             self.ram.write(value, address)
         except Exception as e:
-            spawn_box(f"Write error\n\n{e}", "Connection failed")
+            spawn_box("Write error", f"Connection failed\n\n{e}")
 
     def on_dump(self):
         """ Dump callback function """
@@ -156,7 +156,7 @@ class MainWindow(QMainWindow, MainUI):
             self.ram.dump_to_file("dump.txt")
         except Exception as e:
             log.warn(e)
-            spawn_box(f"Dump error\n\n{e}", "Connection failed")
+            spawn_box("Dump error", f"Connection failed\n\n{e}")
             return
         spawn_box("Dump", f"Successfully done in {round(time() - t1, 2)}s",
                         QMessageBox.Information)
@@ -178,13 +178,14 @@ class MainWindow(QMainWindow, MainUI):
             if self.ram is None:
                 self.ram = RAM(port=self.port, quality_test=True, timeout=1)
             else:
+                self.ram.close()
                 self.ram = RAM(port=self.port, quality_test=True, timeout=1, baudrate=baudrate)
         except Exception as e:
             log.warn(e)
             self.ram = None
             spawn_box("RS232 test", f"Could not connect to device {self.port}:\n\n{e}", QMessageBox.Warning)
             return
-        if self.ram is None or self.ram.serial.port is None:
+        if self.ram is not None or self.ram.serial.port is not None:
             spawn_box("RS232 test", f"Successfully done using port {self.port}",
                       QMessageBox.Information)
             
@@ -196,7 +197,7 @@ class MainWindow(QMainWindow, MainUI):
             self.ram.change_baudrate(baudrate)
         except Exception as e:
             log.warn(e)
-            spawn_box(f"Baudrate change error\n\n{e}", "Connection failed")
+            spawn_box("Baudrate change error", f"Connection failed\n\n{e}")
 
 
 if __name__ == "__main__":
