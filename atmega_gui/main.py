@@ -164,7 +164,7 @@ class MainWindow(QMainWindow, MainUI):
         open = self.check_EditPlus2.isChecked()
         t1 = time()
         try:
-            self.ram.dump_to_file("dump.txt")
+            self.ram.dump_to_file("dump.txt", bar=self.pgb)
         except Exception as e:
             log.warn(e)
             spawn_box("Dump error", f"Connection failed\n\n{e}")
