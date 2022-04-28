@@ -64,7 +64,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="btn_ChargeFich">
+  <widget class="QPushButton" name="btn_ChargeIndx">
    <property name="geometry">
     <rect>
      <x>190</x>
@@ -74,7 +74,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Charger fichier</string>
+    <string>Charger index</string>
    </property>
   </widget>
   <widget class="QFrame" name="frame">
@@ -309,7 +309,7 @@
   <connection>
    <sender>radio_ResCourant</sender>
    <signal>toggled(bool)</signal>
-   <receiver>btn_ChargeFich</receiver>
+   <receiver>btn_ChargeIndx</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -325,7 +325,7 @@
   <connection>
    <sender>radio_ResEnreg</sender>
    <signal>toggled(bool)</signal>
-   <receiver>btn_ChargeFich</receiver>
+   <receiver>btn_ChargeIndx</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
