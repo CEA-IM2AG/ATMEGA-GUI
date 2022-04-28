@@ -83,6 +83,9 @@ class Ui_Dialog(object):
         self.radio_ResEnreg.toggled['bool'].connect(self.txt_Path.setEnabled)
         self.radio_ResCourant.toggled['bool'].connect(self.btn_ChargeIndx.setDisabled)
         self.radio_ResEnreg.toggled['bool'].connect(self.btn_ChargeIndx.setEnabled)
+        self.radio_ResCourant.toggled['bool'].connect(self.txt_Framerate.setDisabled)
+        self.radio_ResCourant.toggled['bool'].connect(self.lbl_s.setDisabled)
+        self.radio_ResCourant.toggled['bool'].connect(self.btn_PlayPause.setDisabled)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):

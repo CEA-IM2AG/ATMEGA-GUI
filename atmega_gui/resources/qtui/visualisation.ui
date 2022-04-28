@@ -338,5 +338,53 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>radio_ResCourant</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>txt_Framerate</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>122</x>
+     <y>28</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>482</x>
+     <y>143</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_ResCourant</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbl_s</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>33</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>547</x>
+     <y>157</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_ResCourant</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>btn_PlayPause</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>92</x>
+     <y>31</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>597</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>
