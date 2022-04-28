@@ -139,8 +139,7 @@ class MainWindow(QMainWindow, MainUI):
         value = int(str_value, base=16)
         try:
             self.ram.write(value, address)
-        except Exception as e:
-            print(e)
+        except:
             spawn_box("Write error", "Connection failed")
 
     def on_dump(self):

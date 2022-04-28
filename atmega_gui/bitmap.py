@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
 
 def print_bitmap(matrix, zoom=False):
     """
@@ -14,10 +13,19 @@ def print_bitmap(matrix, zoom=False):
         :param matrix: matrice des valeurs de modification
         :param zoom: option de zoom pour ignorer les lignes de bits inchanges
     """
-    borne_x = 287 # indice de la derniere colonne de matrix
-    borne_y = 453 # indice de la dernere ligne de matrix
-    if zoom: # option zoom activable depuis
-    # la fenetre de visualisation
+    borne_y = len(matrix) -1 # indice de la derniere colonne de matrix
+    borne_x = len(matrix[0]) -1 # indice de la dernere ligne de matrix
+
+    # Verifier si la matrice est vide
+    if zoom:
+        non_vide = True
+        for line in matrix:
+           non_vide = non_vide or any(line)
+        if not non_vide:
+            zoom = False # Matrice vide
+
+    if zoom: # option zoom activable depuis la fenetre de visualisation
+
         can_zoom = True # indique si la ligne
         # peut etre supprimee
         while can_zoom:
@@ -59,8 +67,8 @@ def print_bitmap(matrix, zoom=False):
                 borne_x -= 1
             else:
                 can_zoom = False
-        
-    colors = [[0 for i in range(borne_x+1)] for j in range(borne_y+1)]
+
+    colors = [[[] for i in range(borne_x+1)] for j in range(borne_y+1)]
     # colors est une copie de matrix ou chaque element est remplace par une couleur
     for i in range(borne_y+1):
         for j in range(borne_x+1):
@@ -72,7 +80,7 @@ def print_bitmap(matrix, zoom=False):
             elif x == 2:
                 colors[i][j] = [0, 0, 255]
             else:
-                colors[i][j] = [255, 255, 0]    
+                colors[i][j] = [255, 255, 0]
     plt.imshow(colors)
     plt.axis('off')
     plt.show()
