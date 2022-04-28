@@ -10,8 +10,6 @@ from time import gmtime, strftime
 from PyQt5 import QtCore, QtMultimedia
 from PyQt5.QtWidgets import QMessageBox
 
-from atmega.ram import RAM
-
 import atmega_gui
 import atmega_gui.variable as variable
 
