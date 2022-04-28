@@ -184,7 +184,7 @@ class MainWindow(QMainWindow, MainUI):
             self.ram = None
             spawn_box("RS232 test", f"Could not connect to device {self.port}:\n\n{e}", QMessageBox.Warning)
             return
-        if self.ram is None or self.ram.port is None:
+        if self.ram is None or self.ram.serial.port is None:
             spawn_box("RS232 test", f"Successfully done using port {self.port}",
                       QMessageBox.Information)
             
