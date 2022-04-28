@@ -1,0 +1,51 @@
+// SCRIPT DE TEST DE MODIFICATION DE CONTENU DE LA RAM PAR IRRADIATION
+// AT128 
+// NE PAS FAIRE TOURNER EN MODE "SOCKET" : simple vérif du bon fonctionnement de la RAM après irradiation et/ou recuit
+
+ 	
+// SYNTAXE :
+//     [<Commande>] [//<commentaire libre>]
+//     		ligne vide autorisée, lignes commentaires autorisées, blancs et TABs autorisés, non case sensitive
+//     COMMANDE : <Instruction> [<paramètres>]
+//     <Fichn> : nom de fichier (path à partir du dossier de l'appli => peut atteindre les sous-dossiers de l'appli)
+//     <Mémoire> : FLASH ou EEPROM
+//     <Liste_Xxxx> : un ou plusieurs paramètres séparés par / (STOP ou STOP/BEEP par exemple). 
+//                    ATTENTION : PAS D'ESPACE entre les paramètres, juste "/"
+
+// COMMANDES :
+
+//    LIRE_RAM  <Pile> [<BlocSize>] lit et place le contenu de la mémoire dans RAM_Dump.txt  (dans le dossier de l'appli)
+//              Pile est un nombre d'octets A NE PAS LIRE à la fin de la RAM (Pile des appels) 
+//		BlocSize est la taille des blocs de lecture de la RAM. Valeurs acceptées : 8, 16, 32, 64, 128. Défaut = 64
+//    COMP      <Fich1> <Fich2> [<Liste_Actions>] : compare Fich1 à Fich2 et actions si différence. 
+//              <Liste_Actions> = STOP/BEEP    : STOP arrête le script, BEEP émet une alerte sonore
+//    COPY      <Fichsou> <Fichdest> [Liste_Params] : Copie Fichsou dans Fichdest
+//              <Liste_Params> = INCR/COMP   : INCR indexe la date et le n° d'éxé du script au nom du fichier
+//                                             COMP ne copie que si la dernière comparaison montre une différence
+//    INIT_RAM  <Data> [<Liste_Actions>]   programme la mémoire selon les paramètres fournis :
+//			<Data> : donnée à écrire
+//			<Liste_Actions> = INCR/COMP  : 	INCR ajoute 1 à chaque nouvelle adresse, en boucle
+//							COMP complémente un mot sur 2
+//    LOOP      <Temporisation> [PENDANT <duree mn>]: rejoue le script en boucle avec une temporisation entre 2 exécutions. 
+//                    Arrêt par bouton STOP ou après la durée totale en minutes associée à PENDANT
+//		      Temporisation en minutes entre deux exécutions (mais on peut mettre 0.1 par exemple => 6s)
+//    DEBLOOP   Début effectif de la boucle : ce qui précède est une initialisation effectuée une seule fois (passe 1) 
+//    BAUDRATE	<newbaudrate> : change la vitesse du port (pour accélérer la relecture de la RAM, pas d'effet sur le reste)
+//         			valeurs acceptées 9600 (défaut), 19200, 38400, 1000000
+//				NB : à la fin du script, la valeur revient à celle qui est affichée sur la combobox			
+
+
+
+INIT_RAM  00										// on programme la RAM
+
+BAUDRATE 1000000									// On met le turbo !
+
+DEBLOOP
+
+LIRE_RAM  40 128  									// lecture dans RAM_Dump.txt
+
+COMP  RefVerif\RAM_00.txt   Dump_RAM.txt BEEP 					// Ici on vérifie que l'effacement est OK
+
+COPY Dump_RAM.txt      Resus\RAM_Verif_Errs_FF.txt     INCR/COMP  			// SVG incrémentale des erreurs s'il y en a	
+// si LOOP, on reboucle tout le script indéfiniment (jusqu'à Stop). Sinon, une seule exécution
+LOOP 0.2 PENDANT 240// SVG incrémentale des erreurs s'il y en a
