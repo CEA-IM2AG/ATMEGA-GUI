@@ -4,12 +4,12 @@
 
 from atmega.ram import RAM
 from time import sleep, time
-from sys import platform
 from time import gmtime, strftime
 from PyQt5 import QtCore, QtMultimedia
 from PyQt5.QtWidgets import QMessageBox
 import atmega_gui
 from os import path
+from math import log2, floor, ceil
 
 
 def spawn_box(title, text, icon=QMessageBox.Warning):
@@ -31,17 +31,28 @@ class TextSignal(QtCore.QObject):
     output = QtCore.pyqtSignal(str)
 
 
+class IntSignal(QtCore.QObject):
+    """ Output signal """
+    output = QtCore.pyqtSignal(int)
+
+
 class TextWorker(QtCore.QThread):
     """ Worker that emit text output """
     def __init__(self, fn, *args, **kwargs):
         super().__init__()
         self.signal = TextSignal()
         self.sound = TextSignal()
+        self.indicator = TextSignal()
+        self.new_diff = TextSignal()
+        self.progress = IntSignal()
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
         self.kwargs['output'] = self.signal.output
         self.kwargs['sound'] = self.sound.output
+        self.kwargs['indicator'] = self.indicator.output
+        self.kwargs['new_diff'] = self.new_diff.output
+        self.kwargs['progress'] = self.progress.output
 
     @QtCore.pyqtSlot()
     def run(self):
@@ -65,18 +76,25 @@ class ScriptExe:
         self.stop = False
         self.running = False
         self.pause = False
+<<<<<<< HEAD
         self.glist = [0]*(ram_size - 40)*8
+=======
+        self.incremental_list = [0]*(device.ram_size)*8
+        self.differential_list = [0]*(device.ram_size)*8
+>>>>>>> c9def87d97eaebfe8747fd398ace2c8fc4b74f23
 
     def on_error_stop(self, sound):
         """ Stop the execution of the script """
         sound.emit("error")
 
+<<<<<<< HEAD
     def exec_file(self, file, device, output=None, sound=None):
+=======
+    def exec_file(self, file,
+                output=FallbackOutput, sound=FallbackOutput,
+                indicator=FallbackOutput, progress=FallbackOutput, new_diff=FallbackOutput):
+>>>>>>> c9def87d97eaebfe8747fd398ace2c8fc4b74f23
         """ Execute a script """
-        if output is None:
-            output = FallbackOutput
-        if sound is None:
-            sound = FallbackOutput
         lines = open_file(file)
         start_time = time()
         first_iteration = True
@@ -84,17 +102,29 @@ class ScriptExe:
         inside_loop = False
         last_comp = False
         counter = 1
+        # Everything is supposed to be good at the beginning
+        indicator.emit("green")
         while not self.stop and (first_iteration or looping):
-            while self.pause: # Paused
-                sleep(0.2)
+            if self.pause:
+                # Orange color for pause state
+                indicator.emit("orange")
+                while self.pause: # Paused
+                    sleep(0.2)
+            if last_comp:
+                indicator.emit("red")
+            else:
+                indicator.emit("green")
             current_time = round(time() - start_time, 2)
             output.emit(f"Passe n⁰{counter}")
             output.emit(f"Temps cumulé {current_time}s")
-            for line in lines:
+            for n, line in enumerate(lines):
                 subline = line.split()
                 command = subline[0]
                 arg = subline[1:]
                 nb_arg = len(arg)
+
+                # Update progress
+                progress.emit(int(100*n/len(lines)))
 
                 if command == "CONNECT":
                     pass # Class already connected
@@ -189,10 +219,20 @@ class ScriptExe:
                         beep_on_error = "BEEP" in arg[2]
                         stop_on_error = "STOP" in arg[2]
 
-                    nb_error = compare(arg[0], arg[1], self.glist)
+                    # Differential diff
+                    self.differential_list = [0]*(self.ram.ram_size)*8
+                    nb_error = compare(arg[0], arg[1], self.differential_list)
                     last_comp = nb_error > 0
+
+                    # Incremental diff
+                    compare(arg[0], arg[1], self.incremental_list)
+
+                    current_name = write_diff(self.differential_list, self.incremental_list)
+                    new_diff.emit(current_name)
+
                     if nb_error:
                         output.emit(f"Found {nb_error} differences")
+                        indicator.emit("red") # Update the state
                         if beep_on_error:
                             sound.emit("ding_dong")
                         elif stop_on_error:
@@ -238,6 +278,8 @@ class ScriptExe:
 
             first_iteration = False
             counter += 1
+        # End of the program. We reset the indicator
+        indicator.emit("grey")
 
 
 def compare(old, new, glist):
@@ -248,7 +290,6 @@ def compare(old, new, glist):
         :param new: new file
         :param glist: comparison list
     """
-    print(len(glist))
     try:
         fo = open(old, "r+")
         fn = open(new, "r+")
@@ -281,7 +322,6 @@ def compare(old, new, glist):
                     glist[n*8 + i] = 1
             elif bo > bn:
                 n_diff += 1
-                print(n*8 + 1)
                 if 0 < glist[n*8 + i] < 3:
                     glist[n*8 + i] = 0
                 else:
@@ -325,6 +365,57 @@ def open_file(file):
         if l and not l.isspace():
             cleaned_lines.append(l)
     return cleaned_lines
+
+def write_diff(diff_l, incr_l):
+    """
+        Write diff into a file.
+        :param diff_l: the diffenrial list
+        :param incr_l: the incremental list
+        :return: the name of the created file
+    """
+    # Fichier output
+    date_incr = strftime("%d_%b_%Y_a_%HH%M", gmtime()).upper()
+    dest_name = date_incr + "_diff.txt"
+    try:
+        f = open(dest_name, "w+")
+    except OSError:
+        raise Exception("Could not open file")
+    # Ecriture
+    for d, i in zip(diff_l, incr_l):
+        f.write(f"{d} {i}\n")
+    f.close()
+    # Return the final file
+    return dest_name
+
+def read_diff(filename):
+    """
+        Reads a diff
+        :param filename: the file that contains the diff
+        :return: a tupple for two lists (diffenrial and incremental)
+    """
+    try:
+        f = open(filename, "r+")
+    except OSError:
+        raise Exception("Could not open file")
+
+    lines = f.readlines()
+    f.close()
+
+    diff_l = []
+    incr_l = []
+    for line in lines:
+        [d, i] = line.split()
+        diff_l.append(int(d))
+        incr_l.append(int(i))
+
+    # Conversion into a list of list (dump should be a power of 2)
+    len_power = log2(len(diff_l))
+    line_len = 2**floor(len_power/2)
+    col_len =  2**ceil(len_power/2)
+    diff_l2d = [diff_l[i*col_len:(i+1)*col_len] for i in range(line_len)]
+    incr_l2d = [incr_l[i*col_len:(i+1)*col_len] for i in range(line_len)]
+
+    return diff_l2d, incr_l2d
 
 def play_sound(sound):
     """
