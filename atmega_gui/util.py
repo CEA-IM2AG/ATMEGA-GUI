@@ -218,7 +218,7 @@ class ScriptExe:
                         stop_on_error = "STOP" in arg[2]
 
                     # Differential diff
-                    self.differential_list = [0]*(self.ram.ram_size)*8
+                    self.differential_list = [0]*(variable.device.ram_size)*8
                     nb_error = compare(arg[0], arg[1], self.differential_list)
                     last_comp = nb_error > 0
 
