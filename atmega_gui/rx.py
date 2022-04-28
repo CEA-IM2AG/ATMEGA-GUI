@@ -10,6 +10,7 @@ from atmega_gui.visualisation import VisualizationUI
 
 from atmega_gui.util import ScriptExe, TextWorker
 from atmega_gui.util import spawn_box, play_sound
+from atmega_gui.variable import device
 
 class RxWindow(QMainWindow, rxUI):
     def __init__(self, device, parent=None):

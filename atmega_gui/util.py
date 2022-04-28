@@ -1,15 +1,19 @@
 """
     Utils for memory scripting
 """
-
-from atmega.ram import RAM
-from time import sleep, time
-from time import gmtime, strftime
-from PyQt5 import QtCore, QtMultimedia
-from PyQt5.QtWidgets import QMessageBox
-import atmega_gui
 from os import path
 from math import log2, floor, ceil
+
+from time import sleep, time
+from time import gmtime, strftime
+
+from PyQt5 import QtCore, QtMultimedia
+from PyQt5.QtWidgets import QMessageBox
+
+from atmega.ram import RAM
+
+import atmega_gui
+from atmega_gui.variable import device
 
 
 def spawn_box(title, text, icon=QMessageBox.Warning):

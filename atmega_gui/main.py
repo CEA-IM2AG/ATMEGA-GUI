@@ -15,10 +15,10 @@ from atmega.ram import list_devices
 from atmega_gui.views.Fenetre_main_ui import Ui_Dialog as MainUI
 from atmega_gui.rx import RxWindow
 from atmega_gui.util import spawn_box
+from atmega_gui.variable import device
 
 log = logging.getLogger("ATMEGA GUI")
 
-device = None
 
 class MainWindow(QMainWindow, MainUI):
     def __init__(self, parent=None):
