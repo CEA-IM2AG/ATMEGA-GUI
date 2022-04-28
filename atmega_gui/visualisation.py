@@ -73,7 +73,7 @@ class VisualizationUI(QMainWindow, visualisationUI):
     def on_load_indexes(self):
         """ Callback that update the filename text field """
         file_name = QFileDialog.getOpenFileName(
-            None, "", "", "Dumps (*.txt *_index.txt)")[0]
+            None, "", "", "Dumps (*_index.txt)")[0]
         self.txt_Path.setText(file_name)
 
         try:
