@@ -313,13 +313,13 @@ def compare(old, new, glist):
             if bn > bo:
                 n_diff += 1
                 if 0 < glist[n*8 + i] < 3:
-                    glist[n*8 + i] = 3
+                    glist[n*8 + i] = 0
                 else:
                     glist[n*8 + i] = 1
             elif bo > bn:
                 n_diff += 1
                 if 0 < glist[n*8 + i] < 3:
-                    glist[n*8 + i] = 3
+                    glist[n*8 + i] = 0
                 else:
                     glist[n*8 + i] = 2
     return n_diff
