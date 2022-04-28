@@ -29,6 +29,7 @@ class RxWindow(QMainWindow, rxUI):
         self.btn_Pause.clicked.connect(self.on_pause)
         self.btn_Stop.clicked.connect(self.on_stop)
         self.btn_Browse.clicked.connect(self.on_load)
+        self.btn_Visualisation.clicked.connect(self.on_visualisation)
         # Light indicator
         self.indicator = QLabel(' ', self)
         self.indicator.move(750, 15)
@@ -58,6 +59,10 @@ class RxWindow(QMainWindow, rxUI):
         self.pgb.setValue(0)
         self.change_indicator("green")
 
+    def on_visualisation(self):
+        """ Open visual window """
+        self.visualisation_ui.show()
+
     def on_start(self):
         """ Start callback function """
         if self.device is None:
@@ -73,7 +78,6 @@ class RxWindow(QMainWindow, rxUI):
                         QMessageBox.Warning)
             return
         filename = self.txt_Path.text()
-        self.visualisation_ui.show()
         if filename and not filename.isspace():
             # Creation of another thread
             self.worker = TextWorker(
