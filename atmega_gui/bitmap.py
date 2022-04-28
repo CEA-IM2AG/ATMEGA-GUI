@@ -83,7 +83,7 @@ def print_bitmap(matrix, zoom=False):
                 colors[i][j] = [255, 255, 0]
     plt.imshow(colors)
     plt.axis('off')
-    plt.show()
+    plt.pause(0.05)
 
 
 if __name__ == "__main__":
