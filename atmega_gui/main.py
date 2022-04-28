@@ -30,15 +30,14 @@ class MainWindow(QMainWindow, MainUI):
         try:
             self.ram = RAM(timeout=1)
             self.port = self.ram.serial.port
-            self.combo_Circuit_2.setInsertPolicy(QComboBox.InsertAtTop)
-            index = self.combo_box.findText(self.port)
+            index = self.combo_Circuit_2.findText(self.port)
             self.combo_Circuit_2.removeItem(index)
-            self.combo_Circuit_2.addItem(self.port)
-            self.combo_Circuit_2.setInsertPolicy(QComboBox.InsertAtBottom)
-        except:
+            self.combo_Circuit_2.insertItem(0, self.port)
+            self.combo_Circuit_2.setCurrentText(self.port)
+        except Exception as e:
             self.ram = None
-            log.info("No FTDI device found.")
-            # spawn_box("Connection error", "No device found", QMessageBox.Critical)
+            log.info(f"No FTDI device found: {e}")
+        log.info(f"Final port: {self.port}")
         # RX subwindow
         self.RX_ui = RxWindow(self.ram, self)
 
@@ -92,6 +91,9 @@ class MainWindow(QMainWindow, MainUI):
 
     def on_device_change(self):
         """ Device change callback function """
+        if self.ram is None:
+            spawn_box("No device", "No device selected.")
+            return
         device = self.combo_Circuit.currentText()
         if device == "ATmega128":
             self.ram.ram_size = 2**14
@@ -117,6 +119,9 @@ class MainWindow(QMainWindow, MainUI):
 
     def on_read(self):
         """ Read callback function """
+        if self.ram is None:
+            spawn_box("No device", "No device selected.")
+            return
         str_address = self.txt_Adresse.text()
         if not str_address:
             spawn_box("Read error", "Empty address")
@@ -132,6 +137,9 @@ class MainWindow(QMainWindow, MainUI):
 
     def on_write(self):
         """ Write callback function """
+        if self.ram is None:
+            spawn_box("No device", "No device selected.")
+            return
         str_address = self.txt_Adresse.text()
         str_value = self.txt_Ecrire.text()
         if not str_address:
@@ -149,6 +157,9 @@ class MainWindow(QMainWindow, MainUI):
 
     def on_dump(self):
         """ Dump callback function """
+        if self.ram is None:
+            spawn_box("No device", "No device selected.")
+            return
         # TODO progress bar
         open = self.check_EditPlus2.isChecked()
         t1 = time()
@@ -192,6 +203,9 @@ class MainWindow(QMainWindow, MainUI):
 
     def on_baudrate_change(self):
         """ Baudrate change callback function """
+        if self.ram is None:
+            spawn_box("No device", "No device selected.")
+            return
         baudrate = int(self.combo_Baudrate.currentText())
         try:
             self.ram.change_baudrate(baudrate)
