@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '../../resources/Fenetre_main.ui'
+# Form implementation generated from reading ui file '../resources/qtui/Fenetre_main.ui'
 #
 # Created by: PyQt5 UI code generator 5.12.3
 #
@@ -96,6 +96,12 @@ class Ui_Dialog(object):
         self.btn_Actualiser = QtWidgets.QPushButton(Dialog)
         self.btn_Actualiser.setGeometry(QtCore.QRect(250, 50, 101, 23))
         self.btn_Actualiser.setObjectName("btn_Actualiser")
+        self.pgb = QtWidgets.QProgressBar(Dialog)
+        self.pgb.setEnabled(True)
+        self.pgb.setGeometry(QtCore.QRect(80, 330, 171, 16))
+        self.pgb.setProperty("value", 0)
+        self.pgb.setTextVisible(False)
+        self.pgb.setObjectName("pgb")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
