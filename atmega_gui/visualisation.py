@@ -29,17 +29,22 @@ class VisualizationUI(QMainWindow, visualisationUI):
 
     def on_load_frame(self):
         """ Callback that load the file """
-        filename = self.saved_diff[self.current_diff_index]
+        try:
+            filename = self.saved_diff[self.current_diff_index]
+        except:
+            spawn_box("Visualisation error", "Index out of bounds", QMessageBox.Warning)
+            return
 
         if not filename and not filename.isspace():
-           spawn_box("Visualisation error", "Empty file given", QMessageBox.Warning)
-           return
+            spawn_box("Visualisation error", "Empty file given", QMessageBox.Warning)
+            return
 
         try:
             diff_l, incr_l = read_diff(filename)
-        except:
-           spawn_box("Visualisation error", f"Could not open {filename}", QMessageBox.Warning)
-           return
+        except Exception as e:
+            print(e)
+            spawn_box("Visualisation error", f"Could not open {filename}", QMessageBox.Warning)
+            return
 
         if self.radio_Diff.isChecked():
             print_bitmap(diff_l, self.check_Zoom.isChecked())
@@ -78,6 +83,7 @@ class VisualizationUI(QMainWindow, visualisationUI):
             self.current_diff_index = 0
 
         self.txt_ChoixImage.setText(str(self.current_diff_index + 1))
+        self.on_load_indexes()
 
     def on_next(self):
         """ Callback that updates the frame """
@@ -86,9 +92,10 @@ class VisualizationUI(QMainWindow, visualisationUI):
         if 0 <= index < len(self.saved_diff):
             self.current_diff_index = index
         else:
-            self.current_diff_index = len(self.saved_diff)
+            self.current_diff_index = len(self.saved_diff) - 1
 
         self.txt_ChoixImage.setText(str(self.current_diff_index + 1))
+        self.on_load_indexes()
 
 
 if __name__ == "__main__":

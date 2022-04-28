@@ -435,7 +435,7 @@ def read_index_diff(filename):
 
     dumps = []
     for file in files:
-        dumps.append(file)
+        dumps.append(file.split()[0])
     return dumps
 
 def write_index(index_list):
