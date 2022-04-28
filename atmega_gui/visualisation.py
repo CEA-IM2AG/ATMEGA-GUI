@@ -16,7 +16,7 @@ class VisualizationUI(QMainWindow, visualisationUI):
 
     def connectSignalsSlots(self):
         self.btn_Load.clicked.connect(self.on_load)
-        self.btn_ChargeFich.clicked.connect(self.load_fich)
+        self.btn_ChargeIndx.clicked.connect(self.load_fich)
 
     def on_load(self):
         """ Callback that load the file """
