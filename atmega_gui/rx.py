@@ -19,8 +19,8 @@ class RxWindow(QMainWindow, rxUI):
         self.worker = None
         self.visualisation_ui = VisualizationUI(self)
         # List of diff of the current session
-        self.diffs = []
-        self.visualisation_ui.diffs = self.diffs
+        self.session_diffs = []
+        self.visualisation_ui.session_diffs = self.session_diffs
 
     def connectSignalsSlots(self):
         """ Implement all the actions on each component """
@@ -98,7 +98,7 @@ class RxWindow(QMainWindow, rxUI):
             Add a diff to the list diffs.
             :param filename: the file to add.
         """
-        self.diffs.append(filename)
+        self.session_diffs.append(filename)
         self.visualisation_ui.current_diff = filename
 
     def on_pause(self):

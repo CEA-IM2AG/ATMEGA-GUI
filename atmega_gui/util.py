@@ -414,6 +414,45 @@ def read_diff(filename):
 
     return diff_l2d, incr_l2d
 
+def read_index_diff(filename):
+    """
+        Reads the indexes from a file.
+        The file contains a list of filenames (one per line).
+        :param file: file to read the indexes from
+        :return: list of name of files that are the dumps
+    """
+    try:
+        f = open(filename, "r+")
+    except OSError:
+        raise Exception("Could not open file")
+
+    files = f.readlines()
+    f.close()
+
+    dumps = []
+    for file in files:
+        dumps.append(file)
+    return dumps
+
+def write_index(index_list):
+    """
+        Writes an index list into a file, following the same
+        convention as the function read_index_diff.
+        :param index_list: le list to write into a file
+        :return: filename of the index file
+    """
+    date_incr = strftime("%d_%b_%Y_a_%HH%MM%SS", gmtime()).upper()
+    dest_name = date_incr + "_index.txt"
+    try:
+        f = open(dest_name, "w+")
+    except OSError:
+        raise Exception("Could not open file")
+
+    for file in index_list:
+        f.write(file)
+    f.close
+    return dest_name
+
 def play_sound(sound):
     """
         Plays a sound inside a Qt context.

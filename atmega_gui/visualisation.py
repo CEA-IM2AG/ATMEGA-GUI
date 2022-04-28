@@ -1,9 +1,11 @@
 """ Visualization window """
 
 import sys
+from PyQt5 import QtCore
+from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from atmega_gui.views.visualisation_ui import Ui_Dialog as visualisationUI
-from atmega_gui.util import read_diff, spawn_box
+from atmega_gui.util import read_diff, spawn_box, read_index_diff
 from atmega_gui.bitmap import print_bitmap
 
 class VisualizationUI(QMainWindow, visualisationUI):
@@ -11,36 +13,83 @@ class VisualizationUI(QMainWindow, visualisationUI):
         super().__init__(parent)
         self.setupUi(self)
         self.connectSignalsSlots()
-        self.current_diff = ""
-        self.diffs = []
+        self.session_diffs = []
+        self.saved_diff = []
+        self.current_diff_index = 0
 
     def connectSignalsSlots(self):
-        self.btn_Load.clicked.connect(self.on_load)
-        self.btn_ChargeIndx.clicked.connect(self.load_fich)
+        # Buttons mapping
+        self.btn_Load.clicked.connect(self.on_load_frame)
+        self.btn_ChargeIndx.clicked.connect(self.on_load_indexes)
+        self.btn_PrevFrame.clicked.connect(self.on_prev)
+        self.btn_NextFrame.clicked.connect(self.on_next)
+        # Validator
+        int_validator = QRegExpValidator(QtCore.QRegExp("[0-9]+"))
+        self.txt_ChoixImage.setValidator(int_validator)
 
-    def on_load(self):
+    def on_load_frame(self):
         """ Callback that load the file """
-        if self.radio_ResEnreg.isChecked():
-            filename = self.txt_Path.text()
-        else:
-            filename = self.current_diff
+        filename = self.saved_diff[self.current_diff_index]
 
         if not filename and not filename.isspace():
-           spawn_box("Script reader", "Empty file given", QMessageBox.Warning)
+           spawn_box("Visualisation error", "Empty file given", QMessageBox.Warning)
            return
 
-        diff_l, incr_l = read_diff(filename)
+        try:
+            diff_l, incr_l = read_diff(filename)
+        except:
+           spawn_box("Visualisation error", f"Could not open {filename}", QMessageBox.Warning)
+           return
 
         if self.radio_Diff.isChecked():
             print_bitmap(diff_l, self.check_Zoom.isChecked())
         else:
             print_bitmap(incr_l, self.check_Zoom.isChecked())
 
-    def load_fich(self):
+    def on_load_indexes(self):
         """ Callback that update the filename text field """
         file_name = QFileDialog.getOpenFileName(
             None, "", "", "Dumps (*.txt *_index.txt)")[0]
         self.txt_Path.setText(file_name)
+
+        try:
+            index_list = read_index_diff(file_name)
+        except:
+            spawn_box("Error", "Could not open index file", QMessageBox.Warning)
+            return
+
+        if len(index_list) == 0:
+            spawn_box("Error", "Empty index file", QMessageBox.Warning)
+            return
+
+        if self.current_diff_index >= len(index_list):
+            self.current_diff_index = 0
+            self.txt_ChoixImage.setText("1")
+
+        self.saved_diff = index_list
+
+    def on_prev(self):
+        """ Callback that updates the frame """
+        index = int(self.txt_ChoixImage.text()) - 2
+
+        if 0 <= index < len(self.saved_diff):
+            self.current_diff_index = index
+        else:
+            self.current_diff_index = 0
+
+        self.txt_ChoixImage.setText(str(self.current_diff_index + 1))
+
+    def on_next(self):
+        """ Callback that updates the frame """
+        index = int(self.txt_ChoixImage.text())
+
+        if 0 <= index < len(self.saved_diff):
+            self.current_diff_index = index
+        else:
+            self.current_diff_index = len(self.saved_diff)
+
+        self.txt_ChoixImage.setText(str(self.current_diff_index + 1))
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
