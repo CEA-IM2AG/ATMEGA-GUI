@@ -1,26 +1,29 @@
 """ RX scripting window """
 
 import sys
+
+from PyQt5.QtWidgets import QMessageBox, QLabel
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+
 from atmega_gui.views.Fenetre_RX_ui import Ui_Dialog as rxUI
 from atmega_gui.visualisation import VisualizationUI
+
 from atmega_gui.util import ScriptExe, TextWorker
-from PyQt5.QtWidgets import QMessageBox, QLabel
 from atmega_gui.util import spawn_box, play_sound
 
+import atmega_gui.variable as variable
 
 class RxWindow(QMainWindow, rxUI):
-    def __init__(self, device, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.device = device
         self.setupUi(self)
         self.connectSignalsSlots()
-        self.script_exe = ScriptExe(self.device)
+        self.script_exe = ScriptExe()
         self.worker = None
         self.visualisation_ui = VisualizationUI(self)
         # List of diff of the current session
-        self.diffs = []
-        self.visualisation_ui.diffs = self.diffs
+        self.session_diffs = []
+        self.visualisation_ui.session_diffs = self.session_diffs
 
     def connectSignalsSlots(self):
         """ Implement all the actions on each component """
@@ -65,7 +68,7 @@ class RxWindow(QMainWindow, rxUI):
 
     def on_start(self):
         """ Start callback function """
-        if self.device is None:
+        if variable.device is None:
             spawn_box("Error", f"Script execution failed:\n\nNo device selected", QMessageBox.Warning)
             return
         
@@ -98,7 +101,7 @@ class RxWindow(QMainWindow, rxUI):
             Add a diff to the list diffs.
             :param filename: the file to add.
         """
-        self.diffs.append(filename)
+        self.session_diffs.append(filename)
         self.visualisation_ui.current_diff = filename
 
     def on_pause(self):

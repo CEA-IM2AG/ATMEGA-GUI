@@ -18,10 +18,11 @@ def print_bitmap(matrix, zoom=False):
 
     # Verifier si la matrice est vide
     if zoom:
-        non_vide = True
+        vide = True
         for line in matrix:
-           non_vide = non_vide or any(line)
-        if not non_vide:
+           line_empty = not any(line)
+           vide = vide and line_empty
+        if vide:
             zoom = False # Matrice vide
 
     if zoom: # option zoom activable depuis la fenetre de visualisation

@@ -15,6 +15,7 @@ from atmega.ram import list_devices
 from atmega_gui.views.Fenetre_main_ui import Ui_Dialog as MainUI
 from atmega_gui.rx import RxWindow
 from atmega_gui.util import spawn_box
+import atmega_gui.variable as variable
 
 log = logging.getLogger("ATMEGA GUI")
 
@@ -28,18 +29,18 @@ class MainWindow(QMainWindow, MainUI):
         # Connection à la carte
         self.port = None
         try:
-            self.ram = RAM(timeout=1)
-            self.port = self.ram.serial.port
+            variable.device = RAM(timeout=1)
+            self.port = variable.device.serial.port
             index = self.combo_Circuit_2.findText(self.port)
             self.combo_Circuit_2.removeItem(index)
             self.combo_Circuit_2.insertItem(0, self.port)
             self.combo_Circuit_2.setCurrentText(self.port)
         except Exception as e:
-            self.ram = None
+            variable.device = None
             log.info(f"No FTDI device found: {e}")
         log.info(f"Final port: {self.port}")
         # RX subwindow
-        self.RX_ui = RxWindow(self.ram, self)
+        self.RX_ui = RxWindow(self)
 
     def connectSignalsSlots(self):
         """ Implement all the actions on each component """
@@ -77,8 +78,8 @@ class MainWindow(QMainWindow, MainUI):
     def closeWindow(self):
         """ Close all subwindows """
         self.RX_ui.close()
-        if self.ram is not None: # Restauration de l'appareil
-            self.ram.close()
+        if variable.device is not None: # Restauration de l'appareil
+            variable.device.close()
         self.close()
 
     def openRX(self):
@@ -91,14 +92,14 @@ class MainWindow(QMainWindow, MainUI):
 
     def on_device_change(self):
         """ Device change callback function """
-        if self.ram is None:
+        if variable.device is None:
             spawn_box("No device", "No device selected.")
             return
         device = self.combo_Circuit.currentText()
         if device == "ATmega128":
-            self.ram.ram_size = 2**14
+            variable.device.ram_size = 2**14
         else: # atmega32
-            self.ram.ram_size = 2**11
+            variable.device.ram_size = 2**11
 
     def on_reset(self):
         """ Reset callback function """
@@ -110,7 +111,7 @@ class MainWindow(QMainWindow, MainUI):
         complement = self.check_Comple.isChecked()
         increment = self.check_Incre.isChecked()
         try:
-            self.ram.reset(value, increment, complement)
+            variable.device.reset(value, increment, complement)
         except Exception as e:
             log.warn(e)
             spawn_box("Reset error", f"Connection failed\n\n{e}")
@@ -119,7 +120,7 @@ class MainWindow(QMainWindow, MainUI):
 
     def on_read(self):
         """ Read callback function """
-        if self.ram is None:
+        if variable.device is None:
             spawn_box("No device", "No device selected.")
             return
         str_address = self.txt_Adresse.text()
@@ -128,7 +129,7 @@ class MainWindow(QMainWindow, MainUI):
             return
         address = int(str_address, base=16)
         try:
-            val = self.ram.read(address)
+            val = variable.device.read(address)
         except Exception as e:
             log.warn(e)
             spawn_box("Read error", f"Connection failed\n\n{e}")
@@ -137,7 +138,7 @@ class MainWindow(QMainWindow, MainUI):
 
     def on_write(self):
         """ Write callback function """
-        if self.ram is None:
+        if variable.device is None:
             spawn_box("No device", "No device selected.")
             return
         str_address = self.txt_Adresse.text()
@@ -151,20 +152,20 @@ class MainWindow(QMainWindow, MainUI):
         address = int(str_address, base=16)
         value = int(str_value, base=16)
         try:
-            self.ram.write(value, address)
+            variable.device.write(value, address)
         except Exception as e:
             spawn_box("Write error", f"Connection failed\n\n{e}")
 
     def on_dump(self):
         """ Dump callback function """
-        if self.ram is None:
+        if variable.device is None:
             spawn_box("No device", "No device selected.")
             return
         # TODO progress bar
         open = self.check_EditPlus2.isChecked()
         t1 = time()
         try:
-            self.ram.dump_to_file("dump.txt")
+            variable.device.dump_to_file("dump.txt", bar=self.pgb)
         except Exception as e:
             log.warn(e)
             spawn_box("Dump error", f"Connection failed\n\n{e}")
@@ -186,29 +187,29 @@ class MainWindow(QMainWindow, MainUI):
         baudrate = int(self.combo_Baudrate.currentText())
         self.port = self.combo_Circuit_2.currentText()
         try:
-            if self.ram is None:
-                self.ram = RAM(port=self.port, quality_test=True, timeout=1)
+            if variable.device is None:
+                variable.device = RAM(port=self.port, quality_test=True, timeout=1)
             else:
-                self.ram.close()
-                self.ram = RAM(port=self.port, quality_test=True, timeout=1, baudrate=baudrate)
+                variable.device.close()
+                variable.device = RAM(port=self.port, quality_test=True, timeout=1, baudrate=baudrate)
         except Exception as e:
             log.warn(e)
-            self.ram = None
+            variable.device = None
             spawn_box("RS232 test", f"Could not connect to device {self.port}:\n\n{e}", QMessageBox.Warning)
             return
-        if self.ram is not None or self.ram.serial.port is not None:
+        if variable.device is not None or variable.device.serial.port is not None:
             spawn_box("RS232 test", f"Successfully done using port {self.port}",
                       QMessageBox.Information)
             
 
     def on_baudrate_change(self):
         """ Baudrate change callback function """
-        if self.ram is None:
+        if variable.device is None:
             spawn_box("No device", "No device selected.")
             return
         baudrate = int(self.combo_Baudrate.currentText())
         try:
-            self.ram.change_baudrate(baudrate)
+            variable.device.change_baudrate(baudrate)
         except Exception as e:
             log.warn(e)
             spawn_box("Baudrate change error", f"Connection failed\n\n{e}")

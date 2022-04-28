@@ -1,15 +1,19 @@
 """
     Utils for memory scripting
 """
-
-from atmega.ram import RAM
-from time import sleep, time
-from time import gmtime, strftime
-from PyQt5 import QtCore, QtMultimedia
-from PyQt5.QtWidgets import QMessageBox
-import atmega_gui
 from os import path
 from math import log2, floor, ceil
+
+from time import sleep, time
+from time import gmtime, strftime
+
+from PyQt5 import QtCore, QtMultimedia
+from PyQt5.QtWidgets import QMessageBox
+
+from atmega.ram import RAM
+
+import atmega_gui
+import atmega_gui.variable as variable
 
 
 def spawn_box(title, text, icon=QMessageBox.Warning):
@@ -67,13 +71,12 @@ class FallbackOutput:
 
 class ScriptExe:
     """ Script reader """
-    def __init__(self, device):
+    def __init__(self):
         """
             Initialisation of the script executer with callback functions.
             :param ram_size: device that will perform the commands
             :param log_function: callback function that will be called on errors
         """
-        self.device = device
         self.stop = False
         self.running = False
         self.pause = False
@@ -88,8 +91,8 @@ class ScriptExe:
                   output=FallbackOutput, sound=FallbackOutput,
                   indicator=FallbackOutput, progress=FallbackOutput, new_diff=FallbackOutput):
         """ Execute a script """
-        self.incremental_list = [0]*(self.device.ram_size)*8
-        self.differential_list = [0]*(self.device.ram_size)*8
+        self.incremental_list = [0]*(variable.device.ram_size)*8
+        self.differential_list = [0]*(variable.device.ram_size)*8
         lines = open_file(file)
         start_time = time()
         first_iteration = True
@@ -139,7 +142,7 @@ class ScriptExe:
                         complement = "COMP" in arg[1]
                         increment = "INCR" in arg[1]
                     try:
-                        self.device.reset(value, increment, complement)
+                        variable.device.reset(value, increment, complement)
                         output.emit("OK")
                     except:
                         output.emit("Reset error")
@@ -159,7 +162,7 @@ class ScriptExe:
                     if nb_arg == 2:
                         block_size = int(arg[1])
                     try:
-                        self.device.dump_to_file("Dump_RAM.txt", reserve_stack, block_size)
+                        variable.device.dump_to_file("Dump_RAM.txt", reserve_stack, block_size)
                     except:
                         output.emit("Error on ram dump")
                         self.on_error_stop(sound)
@@ -191,7 +194,7 @@ class ScriptExe:
                         return
                     baudrate = int(arg[0])
                     try:
-                        self.device.change_baudrate(baudrate)
+                        variable.device.change_baudrate(baudrate)
                         output.emit("Baudrate OK")
                     except:
                         output.emit("Error on baudrate change")
@@ -413,6 +416,45 @@ def read_diff(filename):
     incr_l2d = [incr_l[i*col_len:(i+1)*col_len] for i in range(line_len)]
 
     return diff_l2d, incr_l2d
+
+def read_index_diff(filename):
+    """
+        Reads the indexes from a file.
+        The file contains a list of filenames (one per line).
+        :param file: file to read the indexes from
+        :return: list of name of files that are the dumps
+    """
+    try:
+        f = open(filename, "r+")
+    except OSError:
+        raise Exception("Could not open file")
+
+    files = f.readlines()
+    f.close()
+
+    dumps = []
+    for file in files:
+        dumps.append(file.split()[0])
+    return dumps
+
+def write_index(index_list):
+    """
+        Writes an index list into a file, following the same
+        convention as the function read_index_diff.
+        :param index_list: le list to write into a file
+        :return: filename of the index file
+    """
+    date_incr = strftime("%d_%b_%Y_a_%HH%MM%SS", gmtime()).upper()
+    dest_name = date_incr + "_index.txt"
+    try:
+        f = open(dest_name, "w+")
+    except OSError:
+        raise Exception("Could not open file")
+
+    for file in index_list:
+        f.write(file)
+    f.close
+    return dest_name
 
 def play_sound(sound):
     """
